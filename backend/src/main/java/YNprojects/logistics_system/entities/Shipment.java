@@ -1,0 +1,41 @@
+package YNprojects.logistics_system.entities;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+public class Shipment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String referenceCode;
+    private Double quantity;
+    private LocalDate departureDate;
+    private LocalDate estimateArrivalDate;
+    private LocalDate actualArrivalDate;
+
+    @Enumerated(EnumType.STRING)
+    private ShipmentStatus status;
+    private TransportMode transportMode;
+    private String destination;
+    private String trackingNumber;
+    private LocalDateTime createdAt;
+
+    @ManyToOne
+    private Product product;
+
+    @OneToMany(mappedBy = "shipment")
+    private List<Alert> alerts;
+}

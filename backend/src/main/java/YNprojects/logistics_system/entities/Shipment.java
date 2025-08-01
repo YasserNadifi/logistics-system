@@ -28,6 +28,8 @@ public class Shipment {
 
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
+
+    @Enumerated(EnumType.STRING)
     private TransportMode transportMode;
     private String destination;
     private String trackingNumber;

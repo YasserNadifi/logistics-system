@@ -23,7 +23,7 @@ public class Inventory {
     private Double reorderThreshold;
     private LocalDateTime lastUpdated;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 }

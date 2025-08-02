@@ -5,6 +5,7 @@ import YNprojects.logistics_system.entities.Inventory;
 import YNprojects.logistics_system.services.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getAllInventory());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<InventoryDto> updateInventory(@RequestBody InventoryDto inventoryDto) {
         return ResponseEntity.ok(inventoryService.updateInventory(inventoryDto));

@@ -5,6 +5,7 @@ import YNprojects.logistics_system.DTO.ProductDto;
 import YNprojects.logistics_system.services.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -27,11 +28,14 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductDto createProductDto) {
         return ResponseEntity.ok(productService.createProduct(createProductDto));
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto productDto) {
         return ResponseEntity.ok(productService.updateProduct(productDto));

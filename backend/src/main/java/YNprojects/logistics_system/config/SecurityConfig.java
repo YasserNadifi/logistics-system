@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsServiceImp userDetailsService;
@@ -32,8 +34,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req->req
-//                                .requestMatchers("/login","/register","/verifyJwt" )
-//                                .permitAll()
+                                .requestMatchers("/login","/register" )
+                                .permitAll()
                                 .anyRequest()
                                 .authenticated()
                 ).userDetailsService(userDetailsService)
@@ -44,7 +46,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-    
+
     @Bean
     public PasswordEncoder PasswordEncoder() {
         return new BCryptPasswordEncoder();

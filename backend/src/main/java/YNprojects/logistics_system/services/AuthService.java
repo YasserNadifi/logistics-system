@@ -32,7 +32,13 @@ public class AuthService {
         newUser.setFullName(request.getFullName());
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setRole(request.getRole());
-        newUser=userRepo.save(newUser);
+        try {
+            newUser=userRepo.save(newUser);
+        } catch (Exception e) {
+            System.out.println("Error in saving user");
+            System.out.println(e.getMessage());
+            throw e;
+        }
         String token = jwtService.generateToken(newUser);
         return new AuthenticationResponse(token);
     }

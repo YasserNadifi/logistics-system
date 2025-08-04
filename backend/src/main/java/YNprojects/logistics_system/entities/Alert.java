@@ -1,10 +1,7 @@
 package YNprojects.logistics_system.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,21 +9,11 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class Alert {
+public abstract class Alert {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @Enumerated(EnumType.STRING)
     private AlertType type;
     private String message;
     private LocalDateTime createdAt;
-
-    @ManyToOne
-    private Shipment shipment;
-
-    @ManyToOne
-    private Product product;
 
 }

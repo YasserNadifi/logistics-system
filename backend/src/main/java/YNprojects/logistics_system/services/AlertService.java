@@ -1,5 +1,6 @@
 package YNprojects.logistics_system.services;
 
+import YNprojects.logistics_system.DTO.AlertDto;
 import YNprojects.logistics_system.entities.*;
 import YNprojects.logistics_system.repositories.ProductAlertRepo;
 import YNprojects.logistics_system.repositories.ShipmentAlertRepo;
@@ -7,6 +8,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -42,6 +46,30 @@ public class AlertService {
         alert.setCreatedAt(LocalDateTime.now());
         alert.setShipment(shipment);
         shipmentAlertRepo.save(alert);
+    }
+
+    public List<AlertDto> getAllAlerts() {
+        List<AlertDto> alerts = new ArrayList<>();
+        List<ProductAlert> productAlerts = productAlertRepo.findAll();
+        List<ShipmentAlert> shipmentAlerts = shipmentAlertRepo.findAll();
+        productAlerts .forEach(pa -> alerts.add(new AlertDto(
+                pa.getId(),
+                pa.getType(),
+                pa.getMessage(),
+                pa.getCreatedAt(),
+                pa.getProduct().getId(),
+                null
+        )));
+        shipmentAlerts.forEach(sa -> alerts.add(new AlertDto(
+                sa.getId(),
+                sa.getType(),
+                sa.getMessage(),
+                sa.getCreatedAt(),
+                null,
+                sa.getShipment().getId()
+        )));
+        alerts.sort(Comparator.comparing(AlertDto::getCreatedAt).reversed());
+        return alerts;
     }
 
 }

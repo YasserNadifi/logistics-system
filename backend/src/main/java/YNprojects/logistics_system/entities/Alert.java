@@ -9,11 +9,12 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@MappedSuperclass
 public abstract class Alert {
 
     @Enumerated(EnumType.STRING)
-    private AlertType type;
-    private String message;
-    private LocalDateTime createdAt;
+    protected AlertType type;
+    protected String message;
+    protected LocalDateTime createdAt;
 
 }

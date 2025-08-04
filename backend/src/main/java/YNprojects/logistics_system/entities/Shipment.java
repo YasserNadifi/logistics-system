@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.mapping.Set;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,5 +40,5 @@ public class Shipment {
     private Product product;
 
     @OneToMany(mappedBy = "shipment")
-    private List<Alert> alerts;
+    private List<ShipmentAlert> alerts;
 }

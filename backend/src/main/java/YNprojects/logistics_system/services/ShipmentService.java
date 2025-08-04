@@ -6,10 +6,7 @@ import YNprojects.logistics_system.DTO.ShipmentDto;
 import YNprojects.logistics_system.entities.*;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.mapper.ShipmentMapper;
-import YNprojects.logistics_system.repositories.InventoryRepo;
-import YNprojects.logistics_system.repositories.ProductAlertRepo;
-import YNprojects.logistics_system.repositories.ProductRepo;
-import YNprojects.logistics_system.repositories.ShipmentRepo;
+import YNprojects.logistics_system.repositories.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +27,8 @@ public class ShipmentService {
     private final ProductRepo productRepo;
     private final AlertService alertService;
     private final ProductAlertRepo productAlertRepo;
+    private final ShipmentAlertRepo shipmentAlertRepo;
+
     private static int dailyCounter = 0;
     private static LocalDate lastResetDate = LocalDate.now();
 
@@ -90,15 +89,38 @@ public class ShipmentService {
         return ShipmentMapper.toShipmentDto(saved);
     }
 
+    public static boolean isValidShipmentTransition(ShipmentStatus current, ShipmentStatus next) {
+        return switch (current) {
+            case PLANNED -> next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.CANCELLED/* || next == ShipmentStatus.DELAYED*/;
+            case IN_TRANSIT -> next == ShipmentStatus.DELIVERED || next == ShipmentStatus.DELAYED || next == ShipmentStatus.CANCELLED;
+            case DELAYED -> next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.CANCELLED;
+            default -> false;
+        };
+    }
+
+
     public ShipmentDto changeStatus(ChangeStatusShipmentDto changeStatusShipmentDto) {
         Shipment shipment = shipmentRepo.findById(changeStatusShipmentDto.getId()).orElseThrow(
                 ()->new ResourceNotFoundException("This shipment doesn't exist.")
         );
+        ShipmentStatus currentStatus = shipment.getStatus();
         ShipmentStatus newStatus = changeStatusShipmentDto.getStatus();
-        shipment.setStatus(newStatus);
-        if(newStatus == ShipmentStatus.DELIVERED) {
-            shipment.setActualArrivalDate(LocalDate.now());
-        } // add more logic for other status here
+
+        if(isValidShipmentTransition(currentStatus, newStatus)) {
+            shipment.setStatus(newStatus);
+            if(newStatus == ShipmentStatus.DELIVERED) {
+                shipment.setActualArrivalDate(LocalDate.now());
+            } else if (newStatus == ShipmentStatus.DELAYED){
+                alertService.createShipmentAlert(shipment, AlertType.SHIPMENT_DELAYED);
+            } else if(currentStatus == ShipmentStatus.DELAYED) {
+                shipmentAlertRepo.deleteByTypeAndShipment(AlertType.SHIPMENT_DELAYED, shipment);
+                if(newStatus == ShipmentStatus.IN_TRANSIT) {
+                    shipment.setEstimateArrivalDate(changeStatusShipmentDto.getNewEstimateArrivalDate());
+                }
+            }
+        } else {
+            throw new RuntimeException("not valid shipment transition");//add custom exception
+        }
         Shipment saved = shipmentRepo.save(shipment);
         return ShipmentMapper.toShipmentDto(saved);
     }

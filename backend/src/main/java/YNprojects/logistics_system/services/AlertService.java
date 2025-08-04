@@ -1,7 +1,6 @@
 package YNprojects.logistics_system.services;
 
 import YNprojects.logistics_system.entities.*;
-import YNprojects.logistics_system.repositories.AlertRepo;
 import YNprojects.logistics_system.repositories.ProductAlertRepo;
 import YNprojects.logistics_system.repositories.ShipmentAlertRepo;
 import lombok.AllArgsConstructor;

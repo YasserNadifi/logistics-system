@@ -34,6 +34,6 @@ public class Product {
     private Inventory inventory;
 
     @OneToMany(mappedBy = "product")
-    private List<Alert> alerts;
+    private List<ProductAlert> alerts;
 
 }

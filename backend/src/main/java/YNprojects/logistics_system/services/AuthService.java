@@ -2,10 +2,13 @@ package YNprojects.logistics_system.services;
 
 import YNprojects.logistics_system.entities.AuthenticationResponse;
 import YNprojects.logistics_system.entities.User;
+import YNprojects.logistics_system.exceptions.UsernameAlreadyTakenException;
 import YNprojects.logistics_system.repositories.UserRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +25,7 @@ public class AuthService {
 
     public AuthenticationResponse register(User request) {
         if (userRepo.existsByUsername(request.getUsername())){
-            throw new RuntimeException("username already taken");
-            //replace with custom exception
+            throw new UsernameAlreadyTakenException();
         }
         User newUser = new User();
         newUser.setUsername(request.getUsername());
@@ -44,12 +46,16 @@ public class AuthService {
     }
 
     public AuthenticationResponse login(User request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Wrong Username or Password");
+        }
         User user = userRepo.findByUsername(request.getUsername()).orElseThrow();
         String token = jwtService.generateToken(user);
         return new AuthenticationResponse(token);

@@ -23,6 +23,11 @@ public class ShipmentController {
         return ResponseEntity.ok(shipmentService.getAllShipment());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ShipmentDto> getShipmentById(@PathVariable Long id) {
+        return ResponseEntity.ok(shipmentService.getShipmentById(id));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<ShipmentDto> createShipment(@RequestBody CreateShipmentDto createShipmentDto) {
         return ResponseEntity.ok(shipmentService.createShipment(createShipmentDto));

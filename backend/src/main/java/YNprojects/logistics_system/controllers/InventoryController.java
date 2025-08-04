@@ -2,6 +2,7 @@ package YNprojects.logistics_system.controllers;
 
 import YNprojects.logistics_system.DTO.InventoryDto;
 import YNprojects.logistics_system.entities.Inventory;
+import YNprojects.logistics_system.mapper.InventoryMapper;
 import YNprojects.logistics_system.services.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,11 @@ public class InventoryController {
     @GetMapping
     public ResponseEntity<List<InventoryDto>> getAllInventory() {
         return ResponseEntity.ok(inventoryService.getAllInventory());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<InventoryDto> getInventoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(inventoryService.getInventoryById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

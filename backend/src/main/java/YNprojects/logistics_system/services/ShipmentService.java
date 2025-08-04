@@ -5,6 +5,7 @@ import YNprojects.logistics_system.DTO.CreateShipmentDto;
 import YNprojects.logistics_system.DTO.ShipmentDto;
 import YNprojects.logistics_system.entities.Shipment;
 import YNprojects.logistics_system.entities.ShipmentStatus;
+import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.mapper.ShipmentMapper;
 import YNprojects.logistics_system.repositories.ProductRepo;
 import YNprojects.logistics_system.repositories.ShipmentRepo;
@@ -31,6 +32,13 @@ public class ShipmentService {
 
     public List<ShipmentDto> getAllShipment() {
         return shipmentRepo.findAll().stream().map(ShipmentMapper::toShipmentDto).collect(Collectors.toList());
+    }
+
+    public ShipmentDto getShipmentById(Long id) {
+        Shipment shipment = shipmentRepo.findById(id).orElseThrow(
+                ()->new ResourceNotFoundException("This shipment doesn't exist.")
+        );
+        return ShipmentMapper.toShipmentDto(shipment);
     }
 
     public String generateReferenceCode() {
@@ -63,7 +71,9 @@ public class ShipmentService {
     }
 
     public ShipmentDto changeStatus(ChangeStatusShipmentDto changeStatusShipmentDto) {
-        Shipment shipment = shipmentRepo.findById(changeStatusShipmentDto.getId()).get();
+        Shipment shipment = shipmentRepo.findById(changeStatusShipmentDto.getId()).orElseThrow(
+                ()->new ResourceNotFoundException("This shipment doesn't exist.")
+        );
         ShipmentStatus newStatus = changeStatusShipmentDto.getStatus();
         shipment.setStatus(newStatus);
         if(newStatus == ShipmentStatus.DELIVERED) {

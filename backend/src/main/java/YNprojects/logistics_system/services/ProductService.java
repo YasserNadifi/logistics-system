@@ -3,6 +3,7 @@ package YNprojects.logistics_system.services;
 import YNprojects.logistics_system.DTO.CreateProductDto;
 import YNprojects.logistics_system.DTO.ProductDto;
 import YNprojects.logistics_system.entities.Product;
+import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.mapper.ProductMapper;
 import YNprojects.logistics_system.repositories.InventoryRepo;
 import YNprojects.logistics_system.repositories.ProductRepo;
@@ -26,7 +27,9 @@ public class ProductService {
     }
 
     public ProductDto getProductById(Long id) {
-        Product product = productRepo.findById(id).orElse(null/*add logic or exception+handlers here*/);
+        Product product = productRepo.findById(id).orElseThrow(
+                ()->new ResourceNotFoundException("This product doesn't exist.")
+        );
         return ProductMapper.toProductDto(product);
     }
 
@@ -44,7 +47,9 @@ public class ProductService {
     }
 
     public ProductDto updateProduct(ProductDto productDto) {
-        Product product = productRepo.findById(productDto.getId()).orElse(null/*add logic or exception+handlers here*/);
+        Product product = productRepo.findById(productDto.getId()).orElseThrow(
+                ()->new ResourceNotFoundException("This product doesn't exist.")
+        );
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setUnit(productDto.getUnit());

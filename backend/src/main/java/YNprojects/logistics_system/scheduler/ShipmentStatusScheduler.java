@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,9 +23,17 @@ public class ShipmentStatusScheduler {
     private final ShipmentRepo shipmentRepo;
     private final ShipmentService shipmentService;
 
-    @Scheduled(cron = "0 0 0 * * *")
+
     @Transactional
-    public void autoDelayOverdueShipments() {
+    @Scheduled(cron = "0 0 0 * * *")
+    public void auto(){
+        delayOverdueShipments();
+        transitPlannedShipments();
+    }
+
+
+    @Transactional
+    public void delayOverdueShipments() {
         LocalDate today = LocalDate.now();
         List<Shipment> overdue = shipmentRepo
                 .findByStatusAndEstimateArrivalDateBefore(ShipmentStatus.IN_TRANSIT, today);
@@ -35,9 +44,9 @@ public class ShipmentStatusScheduler {
         });
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+
     @Transactional
-    public void autoTransitPlannedShipments() {
+    public void transitPlannedShipments() {
         LocalDate today = LocalDate.now();
         List<Shipment> planned = shipmentRepo.findByStatusAndDepartureDateBefore(ShipmentStatus.PLANNED, today);
         planned.forEach(shipment -> {

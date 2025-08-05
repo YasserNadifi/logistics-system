@@ -61,6 +61,24 @@ public class ShipmentService {
         Shipment shipment = new Shipment();
         Product shippedProduct=productRepo.findById(createShipmentDto.getProductId()).get();
 
+        LocalDate dep = createShipmentDto.getDepartureDate();
+        LocalDate eta = createShipmentDto.getEstimateArrivalDate();
+        if (dep.isAfter(eta)) {
+            throw new RuntimeException(
+                    "Departure date (" + dep + ") must be on or before estimated arrival (" + eta + ")"
+            );//use custom exception here
+        }
+
+        LocalDate today = LocalDate.now();
+        ShipmentStatus status;
+        if (dep.isAfter(today)) {
+            status = ShipmentStatus.PLANNED;
+        } else if (( !dep.isAfter(today) ) && ( !eta.isBefore(today) )) {
+            status = ShipmentStatus.IN_TRANSIT;
+        } else {
+            status = ShipmentStatus.DELAYED;
+        }
+
         shipment.setReferenceCode(generateReferenceCode());
         shipment.setQuantity(createShipmentDto.getQuantity());
         shipment.setDepartureDate(createShipmentDto.getDepartureDate());
@@ -68,7 +86,7 @@ public class ShipmentService {
         shipment.setTransportMode(createShipmentDto.getTransportMode());
         shipment.setDestination(createShipmentDto.getDestination());
         shipment.setTrackingNumber(createShipmentDto.getTrackingNumber());
-        shipment.setStatus(ShipmentStatus.PLANNED);
+        shipment.setStatus(status);
         shipment.setCreatedAt(LocalDateTime.now());
         shipment.setProduct(shippedProduct);
 
@@ -86,6 +104,11 @@ public class ShipmentService {
         }
 
         Shipment saved = shipmentRepo.save(shipment);
+
+        if(saved.getStatus() == ShipmentStatus.DELAYED) {
+            alertService.createShipmentAlert(shipment, AlertType.SHIPMENT_DELAYED);
+        }
+
         return ShipmentMapper.toShipmentDto(saved);
     }
 
@@ -93,12 +116,13 @@ public class ShipmentService {
         return switch (current) {
             case PLANNED -> next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.CANCELLED/* || next == ShipmentStatus.DELAYED*/;
             case IN_TRANSIT -> next == ShipmentStatus.DELIVERED || next == ShipmentStatus.DELAYED || next == ShipmentStatus.CANCELLED;
-            case DELAYED -> next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.CANCELLED;
+            case DELAYED -> next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.CANCELLED || next == ShipmentStatus.DELIVERED;
             default -> false;
         };
     }
 
 
+    @Transactional
     public ShipmentDto changeStatus(ChangeStatusShipmentDto changeStatusShipmentDto) {
         Shipment shipment = shipmentRepo.findById(changeStatusShipmentDto.getId()).orElseThrow(
                 ()->new ResourceNotFoundException("This shipment doesn't exist.")

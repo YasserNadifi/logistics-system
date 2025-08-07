@@ -61,4 +61,19 @@ public class AuthService {
         return new AuthenticationResponse(token);
     }
 
+    public boolean verifyJwt(String jwt) {
+        try {
+            System.out.println("jwt : "+jwt);
+            // i used extractUsername instead of using isValid beacause the latter would require extracting
+            //  the username and then validating the jwt against the user with that username which achieves
+            // nothing, since the actual verification and exception throwing happens inside extractUsername
+            jwtService.extractUsername(jwt);
+            return true;
+        } catch (Exception e) {
+            System.out.println("verifyJwt exception : " + e.getMessage());
+            System.out.println("verifyJwt exception name : " + e.getClass().getName());
+            return false;
+        }
+    }
+
 }

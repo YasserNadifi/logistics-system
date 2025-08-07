@@ -41,6 +41,20 @@ public class UserService {
         return UserMapper.toDto(user);
     }
 
+    public UserDto updateUser(UserDto userDto) {
+        User user = userRepo.findByUsername(userDto.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + userDto.getUsername()));
+        user.setFullName(userDto.getFullName());
+        user.setEmail(userDto.getEmail());
+        user.setRole(userDto.getRole());
+        userRepo.save(user);
+        return UserMapper.toDto(user);
+    }
+
+    public void deleteUser(Long id) {
+        userRepo.deleteById(id);
+    }
+
     public void changePassword(ChangePasswordDto changePasswordDto) {
         User user = userRepo.findByUsername(changePasswordDto.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + changePasswordDto.getUsername()));;

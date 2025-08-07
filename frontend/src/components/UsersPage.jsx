@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Container, Row, Col, Spinner, Modal, Form } from 'react-bootstrap';
+import {
+  Table, Button, Container, Row, Col, Spinner,
+  Modal, Form
+} from 'react-bootstrap';
+import { PencilSquare, Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 
 export const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [newUser, setNewUser] = useState({ username: '', password: '', fullName: '', email: '', role: 'LOGISTICS'  });
-  const [errors, setErrors] = useState({});
-  const token = localStorage.getItem('jwt');
+
+  // Add User Modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newUser, setNewUser] = useState({ username: '', password: '', fullName: '', email: '', role: 'LOGISTICS' });
+  const [addErrors, setAddErrors] = useState({});
+  const [addValidated, setAddValidated] = useState(false);
+
+  // Edit User Modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [editErrors, setEditErrors] = useState({});
+  const [editValidated, setEditValidated] = useState(false);
 
   // Change Password Modal state
   const [showChangeModal, setShowChangeModal] = useState(false);
@@ -18,13 +30,18 @@ export const UsersPage = () => {
   const [changeErrors, setChangeErrors] = useState({});
   const [changeValidated, setChangeValidated] = useState(false);
 
+  // Delete Confirmation Modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+
+  const token = localStorage.getItem('jwt');
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await axios.get('http://localhost:8080/user',
-            { headers : {Authorization : `Bearer ${token}` } }
-        );
+        const { data } = await axios.get('http://localhost:8080/user', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setUsers(data);
       } catch (err) {
         console.error('Failed to fetch users:', err);
@@ -33,48 +50,74 @@ export const UsersPage = () => {
       }
     };
     fetchUsers();
-  }, [showModal, showChangeModal]);
+  }, [showAddModal, showEditModal, showChangeModal, showDeleteModal]);
 
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => {
-    setShowModal(false);
-    setNewUser({ username: '', password: '', firstName: '', lastName: '', role: 'LOGISTICS' });
-    setErrors({});
+  // Add User handlers
+  const openAdd = () => { setShowAddModal(true); setAddValidated(false); };
+  const closeAdd = () => {
+    setShowAddModal(false);
+    setNewUser({ username: '', password: '', fullName: '', email: '', role: 'LOGISTICS' });
+    setAddErrors({});
+  };
+  const handleAddSubmit = async e => {
+    e.preventDefault();
+    setAddValidated(true);
+    const errs = {};
+    if (!newUser.username) errs.username = 'Username required';
+    if (!newUser.password) errs.password = 'Password required';
+    if (!newUser.fullName) errs.fullName = 'Full Name required';
+    if (!newUser.email) errs.email = 'Email required';
+    if (!newUser.role) errs.role = 'Role required';
+    setAddErrors(errs);
+    if (Object.keys(errs).length) return;
+    try {
+      await axios.post('http://localhost:8080/register', newUser, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+      });
+      closeAdd();
+    } catch (err) {
+      if (err.response?.status === 409) {
+        setAddErrors({ username: 'Username already taken' });
+      } else console.error('Add user failed:', err);
+    }
   };
 
-    const handleSubmit = async (e) => {
+  // Edit User handlers
+  const openEdit = user => {
+    setEditUser({ ...user });
+    setShowEditModal(true);
+    setEditValidated(false);
+    setEditErrors({});
+  };
+  const closeEdit = () => {
+    setShowEditModal(false);
+    setEditUser(null);
+    setEditErrors({});
+  };
+  const handleEditSubmit = async e => {
     e.preventDefault();
-    // basic validation
+    setEditValidated(true);
     const errs = {};
-    if (!newUser.username) errs.username = 'Username is required';
-    if (!newUser.password) errs.password = 'Password is required';
-    if (!newUser.fullName) errs.fullName = 'Full Name is required';
-    if (!newUser.email) errs.email = 'Email is required';
-    if (!newUser.role) errs.role = 'Role is required';
-    setErrors(errs);
+    if (!editUser.username) errs.username = 'Username required';
+    if (!editUser.fullName) errs.fullName = 'Full Name required';
+    if (!editUser.email) errs.email = 'Email required';
+    if (!editUser.role) errs.role = 'Role required';
+    setEditErrors(errs);
     if (Object.keys(errs).length) return;
-
     try {
-      const { data } = await axios.post('http://localhost:8080/register', newUser, {
-        headers: { 
-          'Content-Type': 'application/json',
-        }
-      });
-      handleClose();
+      await axios.put(
+        `http://localhost:8080/user`,
+        editUser,
+        { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } }
+      );
+      closeEdit();
     } catch (err) {
-      console.error('Add user failed:', err);
-      console.log()
-      if(err.status==409){
-        console.log(err.status)
-        setErrors({ username: 'Username already taken' });
-        console.log("errors.username : "+errors.username)
-        console.log("errors : "+errors.data)
-      }
+      console.error('Edit user failed:', err);
     }
   };
 
   // Change Password handlers
-  const openChange = (user) => {
+  const openChange = user => {
     setSelectedUser(user);
     setShowChangeModal(true);
     setChangeValidated(false);
@@ -87,7 +130,7 @@ export const UsersPage = () => {
     setSelectedUser(null);
     setChangeErrors({});
   };
-  const handleChangeSubmit = async (e) => {
+  const handleChangeSubmit = async e => {
     e.preventDefault();
     setChangeValidated(true);
     const errs = {};
@@ -95,11 +138,9 @@ export const UsersPage = () => {
     if (newPassword !== confirmPassword) errs.confirmPassword = 'Passwords must match';
     setChangeErrors(errs);
     if (Object.keys(errs).length) return;
-    console.log("newPassword : "+newPassword)
-    console.log("username : "+selectedUser.username)
     try {
       await axios.post(
-        'http://localhost:8080/user/changepassword',
+        "http://localhost:8080/user/changepassword",
         { newPassword: newPassword , username : selectedUser.username },
         { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } }
       );
@@ -109,7 +150,20 @@ export const UsersPage = () => {
     }
   };
 
-
+  // Delete handlers
+  const openDelete = user => { setUserToDelete(user); setShowDeleteModal(true); };
+  const closeDelete = () => { setShowDeleteModal(false); setUserToDelete(null); };
+  const handleDelete = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:8080/user/${userToDelete.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      closeDelete();
+    } catch (err) {
+      console.error('Delete user failed:', err);
+    }
+  };
 
   if (loading) {
     return (
@@ -122,137 +176,182 @@ export const UsersPage = () => {
   return (
     <Container fluid>
       <Row className="mb-3">
-        <Col style={{display: 'flex',alignItems: 'center',justifyContent: 'space-between',}}>
-            <h2>Users</h2>
-          <Button onClick={handleShow} variant="primary">
-            Add User
-          </Button>
+        <Col className="d-flex justify-content-between align-items-center">
+          <h2>Users</h2>
+          <Button variant="primary" onClick={openAdd}>Add User</Button>
         </Col>
       </Row>
-      <Row>
-        <Col>
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Full Name</th>
-                <th>Role</th>
-                <th>Created At</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id}>
-                  <td>{user.id}</td>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td>{user.fullName}</td>
-                  <td>{user.role}</td>
-                  <td>{new Date(user.createdAt).toLocaleString()}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="warning"
-                      onClick={() => openChange(user)}
-                    >
-                      Change Password
-                    </Button>
+      <Row><Col>
+        <Table borderless hover responsive>
+          <thead>
+            <tr>
+              <th>ID</th><th>Username</th><th>Email</th><th>Full Name</th><th>Role</th><th>Created At</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(u => (
+              <tr key={u.id}>
+                <td>{u.id}</td><td>{u.username}</td><td>{u.email}</td><td>{u.fullName}</td><td>{u.role}</td>
+                <td>{new Date(u.createdAt).toLocaleString()}</td>
+                
+                <td className="text-end" style={{ position: 'sticky', right: 0, background: '#fff' }}>
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button size="sm" variant="outline-secondary" onClick={() => openEdit(u)}>
+                        <PencilSquare />
+                      </Button>
+                      <Button size="sm" variant="outline-danger" onClick={() => openDelete(u)}>
+                        <Trash />
+                      </Button>
+                    </div>
                   </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Col>
-      </Row>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Col></Row>
 
-    <Modal show={showModal} onHide={handleClose} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New User</Modal.Title>
-        </Modal.Header>
-        <Form noValidate onSubmit={handleSubmit}>
+      {/* Add User Modal */}
+      <Modal show={showAddModal} onHide={closeAdd} centered>
+        <Modal.Header closeButton><Modal.Title>Add New User</Modal.Title></Modal.Header>
+        <Form noValidate validated={addValidated} onSubmit={handleAddSubmit}>
+          <Modal.Body>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control
+                          required
+                          value={newUser.username}
+                          isInvalid={!!addErrors.username}
+                          onChange={e => setNewUser({ ...newUser, username: e.target.value })}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {addErrors.username}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control
+                          type="password"
+                          required
+                          value={newUser.password}
+                          isInvalid={!!addErrors.password}
+                          onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {addErrors.password}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                                  <Form.Group className="mb-3">
+                        <Form.Label>Full Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          required
+                          value={newUser.fullName}
+                          isInvalid={!!addErrors.fullName}
+                          onChange={e => setNewUser({ ...newUser, fullName: e.target.value })}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {addErrors.fullName}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control
+                          type="email"
+                          required
+                          value={newUser.email}
+                          isInvalid={!!addErrors.email}
+                          onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {addErrors.email}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Role</Form.Label>
+                        <Form.Select
+                          required
+                          value={newUser.role}
+                          isInvalid={!!addErrors.role}
+                          onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+                        >
+                          <option value="ADMIN">ADMIN</option>
+                          <option value="LOGISTICS">LOGISTICS</option>
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">
+                          {addErrors.role}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeAdd}>Cancel</Button>
+            <Button variant="primary" type="submit">Create User</Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Edit User Modal */}
+      <Modal show={showEditModal} onHide={closeEdit} centered>
+        <Modal.Header closeButton><Modal.Title>Edit User : {editUser?.username}</Modal.Title></Modal.Header>
+        <Form noValidate validated={editValidated} onSubmit={handleEditSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Username</Form.Label>
               <Form.Control
+                type="text"
                 required
-                value={newUser.username}
-                isInvalid={!!errors.username}
-                onChange={e => setNewUser({ ...newUser, username: e.target.value })}
+                value={editUser?.username || ''}
+                isInvalid={!!editErrors.username}
+                onChange={e => setEditUser(prev => ({ ...prev, username: e.target.value }))}
+                readOnly
               />
-              <Form.Control.Feedback type="invalid">
-                {errors.username}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{editErrors.username}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                required
-                value={newUser.password}
-                isInvalid={!!errors.password}
-                onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.password}
-              </Form.Control.Feedback>
-            </Form.Group>
-                        <Form.Group className="mb-3">
               <Form.Label>Full Name</Form.Label>
               <Form.Control
                 type="text"
                 required
-                value={newUser.fullName}
-                isInvalid={!!errors.fullName}
-                onChange={e => setNewUser({ ...newUser, fullName: e.target.value })}
+                value={editUser?.fullName || ''}
+                isInvalid={!!editErrors.fullName}
+                onChange={e => setEditUser(prev => ({ ...prev, fullName: e.target.value }))}
               />
-              <Form.Control.Feedback type="invalid">
-                {errors.fullName}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{editErrors.fullName}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
                 required
-                value={newUser.email}
-                isInvalid={!!errors.email}
-                onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                value={editUser?.email || ''}
+                isInvalid={!!editErrors.email}
+                onChange={e => setEditUser(prev => ({ ...prev, email: e.target.value }))}
               />
-              <Form.Control.Feedback type="invalid">
-                {errors.email}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{editErrors.email}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Role</Form.Label>
               <Form.Select
                 required
-                value={newUser.role}
-                isInvalid={!!errors.role}
-                onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+                value={editUser?.role || ''}
+                isInvalid={!!editErrors.role}
+                onChange={e => setEditUser(prev => ({ ...prev, role: e.target.value }))}
               >
                 <option value="ADMIN">ADMIN</option>
                 <option value="LOGISTICS">LOGISTICS</option>
               </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                {errors.role}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{editErrors.role}</Form.Control.Feedback>
             </Form.Group>
+            <Button variant="link" onClick={() => openChange(editUser)}>Change Password</Button>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Create User
-            </Button>
+            <Button variant="secondary" onClick={closeEdit}>Cancel</Button>
+            <Button variant="primary" type="submit">Save Changes</Button>
           </Modal.Footer>
         </Form>
       </Modal>
 
-            <Modal show={showChangeModal} onHide={closeChange} centered>
+      {/* Change Password Modal */}
+      <Modal show={showChangeModal} onHide={closeChange} centered>
         <Modal.Header closeButton>
           <Modal.Title>Change Password for {selectedUser?.username}</Modal.Title>
         </Modal.Header>
@@ -267,9 +366,7 @@ export const UsersPage = () => {
                 isInvalid={!!changeErrors.newPassword}
                 onChange={e => setNewPassword(e.target.value)}
               />
-              <Form.Control.Feedback type="invalid">
-                {changeErrors.newPassword}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{changeErrors.newPassword}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Confirm New Password</Form.Label>
@@ -280,9 +377,7 @@ export const UsersPage = () => {
                 isInvalid={!!changeErrors.confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
               />
-              <Form.Control.Feedback type="invalid">
-                {changeErrors.confirmPassword}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{changeErrors.confirmPassword}</Form.Control.Feedback>
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
@@ -292,6 +387,15 @@ export const UsersPage = () => {
         </Form>
       </Modal>
 
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={closeDelete} centered>
+        <Modal.Header closeButton><Modal.Title>Delete User</Modal.Title></Modal.Header>
+        <Modal.Body>Are you sure you want to delete {userToDelete?.username}?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeDelete}>Cancel</Button>
+          <Button variant="danger" onClick={handleDelete}>Delete</Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }

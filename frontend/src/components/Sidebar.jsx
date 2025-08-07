@@ -9,7 +9,7 @@ export const Sidebar = () => {
         { label: 'ProductsPage',   path: '/products',   roles: ['LOGISTICS', 'ADMIN'] },
         { label: 'InventoryPage',   path: '/inventory',   roles: ['LOGISTICS', 'ADMIN'] },
         { label: 'ShipmentsPage',   path: '/shipments',   roles: ['LOGISTICS', 'ADMIN'] },
-        { label: 'UsersPage',     path: '/users',     roles: ['ADMIN'] },
+        { label: 'Users',     path: '/users',     roles: ['ADMIN'] },
     ];
     
     const links = navItems.filter(item =>

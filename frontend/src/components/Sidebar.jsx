@@ -6,8 +6,8 @@ export const Sidebar = () => {
     const user = JSON.parse(localStorage.getItem('user'))
     const navItems = [
         { label: 'Dashboard', path: '/dashboard', roles: ['LOGISTICS', 'ADMIN'] },
-        { label: 'ProductsPage',   path: '/products',   roles: ['LOGISTICS', 'ADMIN'] },
-        { label: 'InventoryPage',   path: '/inventory',   roles: ['LOGISTICS', 'ADMIN'] },
+        { label: 'Products',   path: '/products',   roles: ['LOGISTICS', 'ADMIN'] },
+        { label: 'Inventory',   path: '/inventory',   roles: ['LOGISTICS', 'ADMIN'] },
         { label: 'ShipmentsPage',   path: '/shipments',   roles: ['LOGISTICS', 'ADMIN'] },
         { label: 'Users',     path: '/users',     roles: ['ADMIN'] },
     ];

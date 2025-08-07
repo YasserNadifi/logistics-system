@@ -75,14 +75,13 @@ export const InventoryPage = () => {
               <td>{item.reorderThreshold}</td>
               <td>{new Date(item.lastUpdated).toLocaleString()}</td>
               <td className="text-end" style={{ position: 'sticky', right: 0, background: '#fff' }}>
-                    <div className="d-flex justify-content-end gap-2">
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={() => handleEditClick(item)}
-                >
-                  <Pencil />
-                </Button>
+                <div className="d-flex justify-content-end gap-2">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => handleEditClick(item)}>
+                    <Pencil />
+                  </Button>
                 </div>
               </td>
             </tr>

@@ -29,7 +29,7 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getInventoryById(id));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<InventoryDto> updateInventory(@RequestBody InventoryDto inventoryDto) {
         return ResponseEntity.ok(inventoryService.updateInventory(inventoryDto));

@@ -4,23 +4,44 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
-export const ProtectedRoute = () => {
+export const ProtectedRoute = ({ allowedRoles = [] }) => {
 
-    const [isJwtValid,setIsJwtValid]=useState(null);
+    const [status, setStatus] = useState('checking'); 
 
     useEffect(()=>{
-        const checkJwt = async ()=>{
+        const check = async ()=>{
             const jwt = localStorage.getItem('jwt');
             if(!jwt){
-                setIsJwtValid(false);
+                console.log("invalid 1");
+                setStatus('invalid')
                 return;
             }
             const valid = await verifyJwt(jwt);
-            console.log("verifyJwt(token) returned:", valid);
-            setIsJwtValid(valid);
-        }
-        checkJwt();
-    },[]);
+            if(!valid) {
+                console.log("invalid 2");
+                setStatus('invalid')
+                return;
+            }
+            try {
+            const user = await axios.post("http://localhost:8080/user/byjwt",
+                {token : jwt},
+                { headers : { Authorization : `Bearer ${jwt}` } }
+            );
+            const role = user.data.role;
+            console.log("retreived role : "+role);
+            if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
+                setStatus('unauthorized');
+                return;
+            } } catch (error) {
+                console.log("invalid 3");
+                console.log(error)
+                setStatus('invalid');
+                return;
+            }
+            setStatus('ok');
+        };
+        check();
+    },[allowedRoles]);
 
     const verifyJwt = async (token)=>{
         try {
@@ -40,11 +61,17 @@ export const ProtectedRoute = () => {
         }
     }
     
-    if (isJwtValid === null) {
-      return <div>Loading...</div>;
-    }
-  if (!isJwtValid) {
-    return <Navigate to="/login" replace />;
+  if (status === 'checking') {
+    return <div>Loading…</div>;
+  }
+
+  if (status === 'invalid') {
+    console.log("hello you are being redirected to login lol")
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  }
+
+  if (status === 'unauthorized') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (

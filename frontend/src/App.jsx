@@ -24,12 +24,16 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path='/register' element={<RegisterPage/>} />
+
             <Route element={<ProtectedRoute/>}>
               <Route path="/dashboard" element={<DashboardPage/>}/>
               <Route path="/products" element={<ProductsPage/>}/>
               <Route path="/inventory" element={<InventoryPage/>}/>
               <Route path="/shipments" element={<ShipmentsPage/>}/>
-              <Route path="/users" element={<UsersPage/>}/>
+            </Route>
+                          
+            <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+              <Route path="/users" element={<UsersPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

@@ -196,7 +196,7 @@ export const UsersPage = () => {
                 
                 <td className="text-end" style={{ position: 'sticky', right: 0, background: '#fff' }}>
                     <div className="d-flex justify-content-end gap-2">
-                      <Button size="sm" variant="outline-secondary" onClick={() => openEdit(u)}>
+                      <Button size="sm" variant="outline-primary" onClick={() => openEdit(u)}>
                         <PencilSquare />
                       </Button>
                       <Button size="sm" variant="outline-danger" onClick={() => openDelete(u)}>

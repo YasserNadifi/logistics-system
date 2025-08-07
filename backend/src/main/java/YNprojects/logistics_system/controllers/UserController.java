@@ -1,5 +1,6 @@
 package YNprojects.logistics_system.controllers;
 
+import YNprojects.logistics_system.DTO.ChangePasswordDto;
 import YNprojects.logistics_system.DTO.UserDto;
 import YNprojects.logistics_system.entities.AuthenticationResponse;
 import YNprojects.logistics_system.entities.Shipment;
@@ -37,4 +38,12 @@ public class UserController {
         System.out.println("in user controller , token : "+authenticationResponse.getToken());
         return ResponseEntity.ok(userService.getUserByJwt(authenticationResponse));
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/changepassword")
+    public ResponseEntity changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
+        userService.changePassword(changePasswordDto);
+        return ResponseEntity.ok().build();
+    }
+
 }

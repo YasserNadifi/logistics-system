@@ -24,7 +24,6 @@ export const Topbar = () => {
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
       }}
     >
-      {/* Left side: logo or app name */}
       <Link to="/dashboard" style={{ textDecoration: 'none', color: '#333' }}>
         <h2 style={{ margin: 0, fontSize: '1.25rem' }}>MyApp</h2>
       </Link>

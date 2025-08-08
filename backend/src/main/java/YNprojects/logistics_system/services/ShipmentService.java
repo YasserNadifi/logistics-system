@@ -124,6 +124,7 @@ public class ShipmentService {
 
     @Transactional
     public ShipmentDto changeStatus(ChangeStatusShipmentDto changeStatusShipmentDto) {
+        System.out.println(changeStatusShipmentDto);
         Shipment shipment = shipmentRepo.findById(changeStatusShipmentDto.getId()).orElseThrow(
                 ()->new ResourceNotFoundException("This shipment doesn't exist.")
         );
@@ -141,6 +142,8 @@ public class ShipmentService {
                 if(newStatus == ShipmentStatus.IN_TRANSIT) {
                     shipment.setEstimateArrivalDate(changeStatusShipmentDto.getNewEstimateArrivalDate());
                 }
+            } else if (currentStatus==ShipmentStatus.PLANNED && newStatus == ShipmentStatus.IN_TRANSIT) {
+                shipment.setDepartureDate(LocalDate.now());
             }
         } else {
             throw new RuntimeException("not valid shipment transition");//add custom exception

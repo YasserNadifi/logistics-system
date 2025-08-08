@@ -9,6 +9,7 @@ import { ProductsPage } from './components/ProductsPage';
 import { InventoryPage } from './components/InventoryPage';
 import { ShipmentsPage } from './components/ShipmentsPage';
 import { UsersPage } from './components/UsersPage';
+import { AlertsPage } from './components/AlertsPage';
 
 export const AppContext = createContext();
 
@@ -30,6 +31,7 @@ function App() {
               <Route path="/products" element={<ProductsPage/>}/>
               <Route path="/inventory" element={<InventoryPage/>}/>
               <Route path="/shipments" element={<ShipmentsPage/>}/>
+              <Route path="/alerts" element={<AlertsPage/>}/>
             </Route>
                           
             <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>

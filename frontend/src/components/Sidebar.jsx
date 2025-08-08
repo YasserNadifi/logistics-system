@@ -8,7 +8,8 @@ export const Sidebar = () => {
         { label: 'Dashboard', path: '/dashboard', roles: ['LOGISTICS', 'ADMIN'] },
         { label: 'Products',   path: '/products',   roles: ['LOGISTICS', 'ADMIN'] },
         { label: 'Inventory',   path: '/inventory',   roles: ['LOGISTICS', 'ADMIN'] },
-        { label: 'ShipmentsPage',   path: '/shipments',   roles: ['LOGISTICS', 'ADMIN'] },
+        { label: 'Shipments',   path: '/shipments',   roles: ['LOGISTICS', 'ADMIN'] },
+        { label: 'AlertsPage',   path: '/alerts',   roles: ['LOGISTICS', 'ADMIN'] },
         { label: 'Users',     path: '/users',     roles: ['ADMIN'] },
     ];
     

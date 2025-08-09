@@ -2,6 +2,7 @@ package YNprojects.logistics_system.mapper;
 
 import YNprojects.logistics_system.DTO.InventoryDto;
 import YNprojects.logistics_system.entities.Inventory;
+import YNprojects.logistics_system.product.mapper.ProductMapper;
 
 public class InventoryMapper {
     public static InventoryDto toInventoryDto(Inventory inventory) {

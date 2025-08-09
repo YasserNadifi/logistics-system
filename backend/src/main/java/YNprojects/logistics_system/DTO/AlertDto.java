@@ -1,6 +1,7 @@
 package YNprojects.logistics_system.DTO;
 
 import YNprojects.logistics_system.entities.AlertType;
+import YNprojects.logistics_system.entities.Inventory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,5 +19,6 @@ public class AlertDto {
     protected String message;
     protected LocalDateTime createdAt;
     private Long    productId;    // nullable
-    private Long    shipmentId;
+    private Long    shipmentId;   // nullable
+    private Long    inventoryId;  // nullable
 }

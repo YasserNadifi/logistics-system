@@ -13,17 +13,9 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@MappedSuperclass
 public class Inventory {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private Double quantity;
-    private Double reorderThreshold;
-    private LocalDateTime lastUpdated;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    protected Double quantity;
+    protected Double reorderThreshold;
+    protected LocalDateTime lastUpdated;
 }

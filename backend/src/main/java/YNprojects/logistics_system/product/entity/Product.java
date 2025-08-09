@@ -1,5 +1,7 @@
-package YNprojects.logistics_system.entities;
+package YNprojects.logistics_system.product.entity;
 
+import YNprojects.logistics_system.productinventory.entities.ProductInventory;
+import YNprojects.logistics_system.entities.Shipment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,9 +33,7 @@ public class Product {
     private List<Shipment> shipments;
 
     @OneToOne(mappedBy = "product")
-    private Inventory inventory;
+    private ProductInventory productInventory;
 
-    @OneToMany(mappedBy = "product")
-    private List<ProductAlert> alerts;
-
+    private Long productionDurationMinutes;
 }

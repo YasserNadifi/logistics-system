@@ -1,8 +1,8 @@
 package YNprojects.logistics_system.entities;
 
+import YNprojects.logistics_system.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.mapping.Set;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,9 +27,10 @@ public class Shipment {
 
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
-
     @Enumerated(EnumType.STRING)
     private TransportMode transportMode;
+    @Enumerated(EnumType.STRING)
+    private ShipmentDirection direction;
     private String destination;
     private String trackingNumber;
     private LocalDateTime createdAt;

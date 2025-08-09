@@ -1,7 +1,7 @@
-package YNprojects.logistics_system.mapper;
+package YNprojects.logistics_system.product.mapper;
 
-import YNprojects.logistics_system.DTO.ProductDto;
-import YNprojects.logistics_system.entities.Product;
+import YNprojects.logistics_system.product.dto.ProductDto;
+import YNprojects.logistics_system.product.entity.Product;
 
 public class ProductMapper {
 
@@ -14,6 +14,7 @@ public class ProductMapper {
         productDto.setUpdatedAt(product.getUpdatedAt());
         productDto.setUnit(product.getUnit());
         productDto.setSku(product.getSku());
+        productDto.setProductionDurationMinutes(product.getProductionDurationMinutes());
         return productDto;
     }
 
@@ -25,6 +26,7 @@ public class ProductMapper {
         product.setUpdatedAt(productDto.getUpdatedAt());
         product.setUnit(productDto.getUnit());
         product.setSku(productDto.getSku());
+        product.setProductionDurationMinutes(productDto.getProductionDurationMinutes());
         return product;
     }
 

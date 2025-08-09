@@ -9,12 +9,18 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@MappedSuperclass
-public abstract class Alert {
+public class Alert {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Enumerated(EnumType.STRING)
-    protected AlertType type;
-    protected String message;
-    protected LocalDateTime createdAt;
+    private AlertType type;
+    private String message;
+    private LocalDateTime createdAt;
+
+    private AlertSourceType sourceType;
+    private Long sourceId;
 
 }

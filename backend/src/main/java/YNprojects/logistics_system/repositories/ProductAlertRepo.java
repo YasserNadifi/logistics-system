@@ -1,7 +1,7 @@
 package YNprojects.logistics_system.repositories;
 
 import YNprojects.logistics_system.entities.AlertType;
-import YNprojects.logistics_system.entities.Product;
+import YNprojects.logistics_system.product.entity.Product;
 import YNprojects.logistics_system.entities.ProductAlert;
 import org.springframework.data.jpa.repository.JpaRepository;
 

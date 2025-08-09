@@ -2,6 +2,7 @@ package YNprojects.logistics_system.mapper;
 
 import YNprojects.logistics_system.DTO.ShipmentDto;
 import YNprojects.logistics_system.entities.Shipment;
+import YNprojects.logistics_system.product.mapper.ProductMapper;
 
 public class ShipmentMapper {
 

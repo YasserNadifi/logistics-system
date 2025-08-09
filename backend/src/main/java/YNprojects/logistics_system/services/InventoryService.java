@@ -1,14 +1,13 @@
 package YNprojects.logistics_system.services;
 
 import YNprojects.logistics_system.DTO.InventoryDto;
-import YNprojects.logistics_system.DTO.ProductDto;
 import YNprojects.logistics_system.entities.AlertType;
 import YNprojects.logistics_system.entities.Inventory;
-import YNprojects.logistics_system.entities.Product;
+import YNprojects.logistics_system.product.entity.Product;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.mapper.InventoryMapper;
+import YNprojects.logistics_system.repositories.InventoryAlertRepo;
 import YNprojects.logistics_system.repositories.InventoryRepo;
-import YNprojects.logistics_system.repositories.ProductAlertRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,8 @@ public class InventoryService {
 
     private final InventoryRepo inventoryRepo;
     private final AlertService alertService;
-    private final ProductAlertRepo productAlertRepo;
+//    private final ProductAlertRepo productAlertRepo;
+    private final InventoryAlertRepo inventoryAlertRepo;
 
     public List<InventoryDto> getAllInventory() {
         return inventoryRepo.findAll().stream().map(InventoryMapper::toInventoryDto).collect(Collectors.toList());
@@ -55,12 +55,15 @@ public class InventoryService {
         inventory.setQuantity(inventoryDto.getQuantity());
         inventory.setReorderThreshold(inventoryDto.getReorderThreshold());
 
-        Product storredProduct = inventory.getProduct();
+//        Product storredProduct = inventory.getProduct();
         if(inventory.getQuantity() <= inventory.getReorderThreshold()){
-            alertService.createProductAlert(storredProduct, AlertType.LOW_STOCK);
+//            alertService.createProductAlert(storredProduct, AlertType.LOW_STOCK);
+            alertService.createInventoryAlert(inventory, AlertType.LOW_STOCK);
         } else {
-            productAlertRepo.deleteByTypeAndProduct(AlertType.LOW_STOCK, storredProduct);
+//            productAlertRepo.deleteByTypeAndProduct(AlertType.LOW_STOCK, storredProduct);
+            inventoryAlertRepo.deleteByTypeAndInventory(AlertType.LOW_STOCK, inventory);
         }
+
 
         Inventory updated = inventoryRepo.save(inventory);
         return InventoryMapper.toInventoryDto(updated);

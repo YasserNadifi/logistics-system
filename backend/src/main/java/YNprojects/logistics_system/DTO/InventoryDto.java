@@ -1,6 +1,6 @@
 package YNprojects.logistics_system.DTO;
 
-import YNprojects.logistics_system.entities.Product;
+import YNprojects.logistics_system.product.dto.ProductDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

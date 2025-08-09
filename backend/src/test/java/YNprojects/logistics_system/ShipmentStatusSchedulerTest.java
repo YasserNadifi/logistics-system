@@ -2,17 +2,15 @@ package YNprojects.logistics_system;
 
 import YNprojects.logistics_system.entities.Shipment;
 import YNprojects.logistics_system.entities.ShipmentStatus;
-import YNprojects.logistics_system.repositories.ProductRepo;
+import YNprojects.logistics_system.product.repository.ProductRepo;
 import YNprojects.logistics_system.repositories.ShipmentRepo;
 import YNprojects.logistics_system.scheduler.ShipmentStatusScheduler;
 import YNprojects.logistics_system.services.ShipmentService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.Clock;
 import java.time.Instant;

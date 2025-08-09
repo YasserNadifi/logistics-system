@@ -6,11 +6,12 @@ import YNprojects.logistics_system.DTO.ShipmentDto;
 import YNprojects.logistics_system.entities.*;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.mapper.ShipmentMapper;
+import YNprojects.logistics_system.product.entity.Product;
+import YNprojects.logistics_system.product.repository.ProductRepo;
 import YNprojects.logistics_system.repositories.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,8 +27,9 @@ public class ShipmentService {
     private final InventoryRepo inventoryRepo;
     private final ProductRepo productRepo;
     private final AlertService alertService;
-    private final ProductAlertRepo productAlertRepo;
+//    private final ProductAlertRepo productAlertRepo;
     private final ShipmentAlertRepo shipmentAlertRepo;
+    private final InventoryAlertRepo inventoryAlertRepo;
 
     private static int dailyCounter = 0;
     private static LocalDate lastResetDate = LocalDate.now();
@@ -98,9 +100,11 @@ public class ShipmentService {
         inventory.setQuantity(inventory.getQuantity() - shipment.getQuantity());
 
         if(inventory.getQuantity() <= inventory.getReorderThreshold()) {
-            alertService.createProductAlert(shippedProduct, AlertType.LOW_STOCK);
+//            alertService.createProductAlert(shippedProduct, AlertType.LOW_STOCK);
+            alertService.createInventoryAlert(inventory, AlertType.LOW_STOCK);
         } else {
-            productAlertRepo.deleteByTypeAndProduct(AlertType.LOW_STOCK, shippedProduct);
+//            productAlertRepo.deleteByTypeAndProduct(AlertType.LOW_STOCK, shippedProduct);
+            inventoryAlertRepo.deleteByTypeAndInventory(AlertType.LOW_STOCK, inventory);
         }
 
         Shipment saved = shipmentRepo.save(shipment);

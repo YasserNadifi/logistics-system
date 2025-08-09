@@ -1,4 +1,4 @@
-package YNprojects.logistics_system.DTO;
+package YNprojects.logistics_system.product.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,4 +19,5 @@ public class ProductDto {
     private LocalDateTime updatedAt;
     private String unit;
     private String sku;
+    private Long productionDurationMinutes;
 }

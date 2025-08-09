@@ -1,14 +1,13 @@
-package YNprojects.logistics_system.controllers;
+package YNprojects.logistics_system.product.controller;
 
-import YNprojects.logistics_system.DTO.CreateProductDto;
-import YNprojects.logistics_system.DTO.ProductDto;
-import YNprojects.logistics_system.services.ProductService;
+import YNprojects.logistics_system.product.dto.CreateProductDto;
+import YNprojects.logistics_system.product.dto.ProductDto;
+import YNprojects.logistics_system.product.service.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController

@@ -1,5 +1,9 @@
 package YNprojects.logistics_system.productinventory.service;
 
+import YNprojects.logistics_system.alert.entity.AlertSeverity;
+import YNprojects.logistics_system.alert.entity.AlertType;
+import YNprojects.logistics_system.alert.entity.EntityType;
+import YNprojects.logistics_system.alert.service.AlertService;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.productinventory.mapper.ProductInventoryMapper;
 import YNprojects.logistics_system.product.entity.Product;
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
 public class ProductInventoryService {
 
     private final ProductInventoryRepo productInventoryRepo;
+    private final AlertService alertService;
 
     public List<ProductInventoryDto> getAllProductInventory() {
         return productInventoryRepo.findAll().stream().map(ProductInventoryMapper::toProductInventoryDto).collect(Collectors.toList());
@@ -50,9 +55,14 @@ public class ProductInventoryService {
         productInventory.setReorderThreshold(productInventoryDto.getReorderThreshold());
 
         if(productInventory.getQuantity() <= productInventory.getReorderThreshold()){
-            //create alert
+            alertService.createIfNotExists(AlertType.LOW_STOCK,
+                    AlertSeverity.WARNING,
+                    EntityType.PRODUCT_INVENTORY,
+                    productInventory.getId());
         } else {
-            //delete alert
+            alertService.resolveByTypeAndEntity(AlertType.LOW_STOCK,
+                    EntityType.PRODUCT_INVENTORY,
+                    productInventory.getId());
         }
         ProductInventory saved = productInventoryRepo.save(productInventory);
         return ProductInventoryMapper.toProductInventoryDto(saved);

@@ -1,5 +1,9 @@
 package YNprojects.logistics_system.productionorder.service;
 
+import YNprojects.logistics_system.alert.entity.AlertSeverity;
+import YNprojects.logistics_system.alert.entity.AlertType;
+import YNprojects.logistics_system.alert.entity.EntityType;
+import YNprojects.logistics_system.alert.service.AlertService;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.product.entity.Product;
 import YNprojects.logistics_system.product.repository.ProductRepo;
@@ -37,6 +41,7 @@ public class ProductionOrderService {
     private final ProductInventoryRepo productInventoryRepo;
     private final ProductRepo productRepo;
     private final RawMaterialRepo rawMaterialRepo;
+    private final AlertService alertService;
 
 
     @Transactional
@@ -201,6 +206,12 @@ public class ProductionOrderService {
             // Deduct now to reserve material
             inventory.setQuantity(inventory.getQuantity() - required);
             rawMaterialInventoryRepo.save(inventory);
+            if (inventory.getQuantity() <= inventory.getReorderThreshold()) {
+                alertService.createIfNotExists(AlertType.RAW_MATERIAL_SHORTAGE,
+                        AlertSeverity.CRITICAL,
+                        EntityType.RAW_MATERIAL_INVENTORY,
+                        inventory.getId());
+            }
         }
 
         order.setStatus(ProductionOrderStatus.IN_PROGRESS);
@@ -219,6 +230,12 @@ public class ProductionOrderService {
         order.setStatus(ProductionOrderStatus.CANCELLED);
         order.setPlannedCompletionDate(null);
         order.setStartDate(null);
+        alertService.createIfNotExists(
+                AlertType.PRODUCTION_CANCELLED,
+                AlertSeverity.WARNING,
+                EntityType.PRODUCTION_ORDER,
+                order.getId()
+        );
     }
 
     /**
@@ -252,6 +269,12 @@ public class ProductionOrderService {
 
         prodInv.setQuantity(prodInv.getQuantity() + producedQty);
         productInventoryRepo.save(prodInv);
+        if(prodInv.getQuantity() > prodInv.getReorderThreshold()) {
+            alertService.resolveByTypeAndEntity(AlertType.LOW_STOCK,
+                    EntityType.PRODUCT_INVENTORY,
+                    prodInv.getId());
+        }
+
 
         order.setStatus(ProductionOrderStatus.COMPLETED);
         order.setPlannedCompletionDate(LocalDate.now());
@@ -278,10 +301,21 @@ public class ProductionOrderService {
 
             inventory.setQuantity(inventory.getQuantity() + quantity);
             rawMaterialInventoryRepo.save(inventory);
+            if (inventory.getQuantity() > inventory.getReorderThreshold()) {
+                alertService.resolveByTypeAndEntity(AlertType.RAW_MATERIAL_SHORTAGE,
+                        EntityType.RAW_MATERIAL_INVENTORY,
+                        inventory.getId());
+            }
         }
 
         order.setStatus(ProductionOrderStatus.CANCELLED);
         order.setPlannedCompletionDate(null);
+        alertService.createIfNotExists(
+                AlertType.PRODUCTION_CANCELLED,
+                AlertSeverity.WARNING,
+                EntityType.PRODUCTION_ORDER,
+                order.getId()
+        );
     }
 
 
@@ -354,6 +388,12 @@ public class ProductionOrderService {
         // 7.a Subtract produced finished goods
         finInv.setQuantity(finInv.getQuantity() - producedQty);
         productInventoryRepo.save(finInv);
+        if(finInv.getQuantity() <= finInv.getReorderThreshold()) {
+            alertService.createIfNotExists(AlertType.LOW_STOCK,
+                    AlertSeverity.WARNING,
+                    EntityType.PRODUCT_INVENTORY,
+                    finInv.getId());
+        }
 
         // 7.b Return raw materials back to inventory
         for (java.util.Map.Entry<Long, Double> e : rawTotals.entrySet()) {
@@ -363,13 +403,23 @@ public class ProductionOrderService {
 
             rawInv.setQuantity(rawInv.getQuantity() + qtyToReturn);
             rawMaterialInventoryRepo.save(rawInv);
+            if (rawInv.getQuantity() > rawInv.getReorderThreshold()) {
+                alertService.resolveByTypeAndEntity(AlertType.RAW_MATERIAL_SHORTAGE,
+                        EntityType.RAW_MATERIAL_INVENTORY,
+                        rawInv.getId());
+            }
+
         }
 
         // 8) Mark order as REVERSED and record audit info (ensure fields exist on entity)
         order.setStatus(ProductionOrderStatus.REVERSED);
-//        order.setReversalDate(java.time.LocalDate.now()); // add this field to ProductionOrder if not present
-//        order.setReversedBy(reversedBy);                  // add this field (String) to track who did it
-//        order.setReversalReason(reason);                  // add this field (String) to store the reason
+        alertService.createIfNotExists(
+                AlertType.PRODUCTION_REVERSED,
+                AlertSeverity.INFO,
+                EntityType.PRODUCTION_ORDER,
+                order.getId()
+        );
+
 
         // Persist and return
         return productionOrderRepo.save(order);

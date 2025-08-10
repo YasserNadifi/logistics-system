@@ -1,5 +1,9 @@
 package YNprojects.logistics_system.shipment.service;
 
+import YNprojects.logistics_system.alert.entity.AlertSeverity;
+import YNprojects.logistics_system.alert.entity.AlertType;
+import YNprojects.logistics_system.alert.entity.EntityType;
+import YNprojects.logistics_system.alert.service.AlertService;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.rawmaterialinventory.entity.RawMaterialInventory;
 import YNprojects.logistics_system.rawmaterialinventory.repository.RawMaterialInventoryRepo;
@@ -39,6 +43,7 @@ public class ShipmentService {
     private final RawMaterialRepo rawMaterialRepo;
     private final ProductInventoryRepo productInventoryRepo;
     private final RawMaterialInventoryRepo rawMaterialInventoryRepo;
+    private final AlertService alertService;
 
     private static int dailyCounter = 0;
     private static LocalDate lastResetDate = LocalDate.now();
@@ -155,6 +160,12 @@ public class ShipmentService {
 
             inv.setQuantity(available - qty);
             productInventoryRepo.save(inv);
+            if(inv.getQuantity() <= inv.getReorderThreshold()) {
+                alertService.createIfNotExists(AlertType.LOW_STOCK,
+                        AlertSeverity.WARNING,
+                        EntityType.PRODUCT_INVENTORY,
+                        inv.getId());
+            }
         }
         // INBOUND: no inventory changes now — inventory is increased when shipment marked DELIVERED
 
@@ -208,6 +219,7 @@ public class ShipmentService {
                 shipment.setDepartureDate(today);
             }
             shipment.setStatus(ShipmentStatus.IN_TRANSIT);
+
         }
 
         // PLANNED -> CANCELLED
@@ -224,8 +236,19 @@ public class ShipmentService {
                         .orElseThrow(() -> new IllegalStateException("No product inventory record for product: " + product.getId()));
                 inv.setQuantity(inv.getQuantity() + shipment.getQuantity());
                 productInventoryRepo.save(inv);
+                if(inv.getQuantity() > inv.getReorderThreshold()) {
+                    alertService.resolveByTypeAndEntity(AlertType.LOW_STOCK,
+                            EntityType.PRODUCT_INVENTORY,
+                            inv.getId());
+                }
             }
             shipment.setStatus(ShipmentStatus.CANCELLED);
+            alertService.createIfNotExists(
+                    AlertType.SHIPMENT_CANCELLED,
+                    AlertSeverity.WARNING,
+                    EntityType.SHIPMENT,
+                    shipment.getId()
+            );
         }
 
         // IN_TRANSIT -> DELIVERED
@@ -241,6 +264,11 @@ public class ShipmentService {
                         .orElseThrow(() -> new IllegalStateException("No raw material inventory for id: " + raw.getId()));
                 rawInv.setQuantity(rawInv.getQuantity() + shipment.getQuantity());
                 rawMaterialInventoryRepo.save(rawInv);
+                if (rawInv.getQuantity() > rawInv.getReorderThreshold()) {
+                    alertService.resolveByTypeAndEntity(AlertType.RAW_MATERIAL_SHORTAGE,
+                            EntityType.RAW_MATERIAL_INVENTORY,
+                            rawInv.getId());
+                }
             }
             // For outbound: inventory was already deducted at creation
 
@@ -254,6 +282,11 @@ public class ShipmentService {
         // IN_TRANSIT -> DELAYED
         else if (current == ShipmentStatus.IN_TRANSIT && targetStatus == ShipmentStatus.DELAYED) {
             shipment.setStatus(ShipmentStatus.DELAYED);
+            alertService.createIfNotExists(
+                    AlertType.SHIPMENT_DELAYED,
+                    AlertSeverity.WARNING,
+                    EntityType.SHIPMENT,
+                    shipment.getId());
         }
 
         // DELAYED -> IN_TRANSIT
@@ -263,6 +296,10 @@ public class ShipmentService {
                 shipment.setDepartureDate(today);
             }
             shipment.setStatus(ShipmentStatus.IN_TRANSIT);
+            alertService.resolveByTypeAndEntity(
+                    AlertType.SHIPMENT_DELAYED,
+                    EntityType.SHIPMENT,
+                    shipment.getId());
         }
         // IN_TRANSIT || DELAYED -> CANCELLED (allow cancelling while in transit)
         else if ((current == ShipmentStatus.IN_TRANSIT || current == ShipmentStatus.DELAYED) && targetStatus == ShipmentStatus.CANCELLED) {
@@ -276,9 +313,26 @@ public class ShipmentService {
                         .orElseThrow(() -> new IllegalStateException("No product inventory record for product: " + product.getId()));
                 inv.setQuantity(inv.getQuantity() + shipment.getQuantity());
                 productInventoryRepo.save(inv);
+                if(inv.getQuantity() > inv.getReorderThreshold()) {
+                    alertService.resolveByTypeAndEntity(AlertType.LOW_STOCK,
+                            EntityType.PRODUCT_INVENTORY,
+                            inv.getId());
+                }
             }
             // inbound: nothing to revert (not yet added)
             shipment.setStatus(ShipmentStatus.CANCELLED);
+            alertService.createIfNotExists(
+                    AlertType.SHIPMENT_CANCELLED,
+                    AlertSeverity.WARNING,
+                    EntityType.SHIPMENT,
+                    shipment.getId()
+            );
+            if(current == ShipmentStatus.DELAYED){
+                alertService.resolveByTypeAndEntity(
+                        AlertType.SHIPMENT_DELAYED,
+                        EntityType.SHIPMENT,
+                        shipment.getId());
+            }
         }
 
         else {

@@ -1,5 +1,9 @@
 package YNprojects.logistics_system.rawmaterialinventory.service;
 
+import YNprojects.logistics_system.alert.entity.AlertSeverity;
+import YNprojects.logistics_system.alert.entity.AlertType;
+import YNprojects.logistics_system.alert.entity.EntityType;
+import YNprojects.logistics_system.alert.service.AlertService;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.rawmaterialinventory.mapper.RawMaterialInventoryMapper;
 import YNprojects.logistics_system.rawmaterial.entity.RawMaterial;
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
 public class RawMaterialInventoryService {
 
     private final RawMaterialInventoryRepo rawMaterialInventoryRepo;
+    private final AlertService alertService;
 
     public List<RawMaterialInventoryDto> getAllRawMaterialInventory() {
         return rawMaterialInventoryRepo.findAll()
@@ -51,9 +56,14 @@ public class RawMaterialInventoryService {
         rawMaterialInventory.setReorderThreshold(rawMaterialInventoryDto.getReorderThreshold());
 
         if (rawMaterialInventory.getQuantity() <= rawMaterialInventory.getReorderThreshold()) {
-            // create alert
+            alertService.createIfNotExists(AlertType.RAW_MATERIAL_SHORTAGE,
+                    AlertSeverity.CRITICAL,
+                    EntityType.RAW_MATERIAL_INVENTORY,
+                    rawMaterialInventory.getId());
         } else {
-            // delete alert
+            alertService.resolveByTypeAndEntity(AlertType.RAW_MATERIAL_SHORTAGE,
+                    EntityType.RAW_MATERIAL_INVENTORY,
+                    rawMaterialInventory.getId());
         }
 
         RawMaterialInventory saved = rawMaterialInventoryRepo.save(rawMaterialInventory);

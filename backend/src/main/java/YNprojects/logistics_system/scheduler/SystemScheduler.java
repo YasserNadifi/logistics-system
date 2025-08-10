@@ -1,6 +1,8 @@
 package YNprojects.logistics_system.scheduler;
 
 
+import YNprojects.logistics_system.alert.entity.AlertType;
+import YNprojects.logistics_system.alert.repository.AlertRepo;
 import YNprojects.logistics_system.productionorder.entity.ProductionOrder;
 import YNprojects.logistics_system.productionorder.entity.ProductionOrderStatus;
 import YNprojects.logistics_system.productionorder.repository.ProductionOrderRepo;
@@ -16,25 +18,33 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
 @Component
-public class ShipmentStatusScheduler {
+public class SystemScheduler {
 
     private final ShipmentRepo shipmentRepo;
     private final ShipmentService shipmentService;
     private final ProductionOrderRepo productionOrderRepo;
     private final ProductionOrderService productionOrderService;
+    private final AlertRepo alertRepo;
+
 
     @Transactional
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 2 0 * * *")
     public void auto(){
         plannedToInProgressProductionOrder();
         inProgressToCompletedProductionOrder();
 
         inTransitToDelayedShipment();
         plannedToInTransitShipment();
+
+        purgeOldCancelledShipmentAlerts();
+
+        purgeOldCancelledProductionOrderAlerts();
+        purgeOldReversedProductionOrderAlerts();
     }
 
 
@@ -81,4 +91,21 @@ public class ShipmentStatusScheduler {
         });
     }
 
+    @Transactional
+    public void purgeOldCancelledShipmentAlerts() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(3);
+        int deleted = alertRepo.deleteByAlertTypeAndCreatedAtBefore(AlertType.SHIPMENT_CANCELLED, cutoff);
+    }
+
+    @Transactional
+    public void purgeOldCancelledProductionOrderAlerts() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(3);
+        int deleted = alertRepo.deleteByAlertTypeAndCreatedAtBefore(AlertType.PRODUCTION_CANCELLED, cutoff);
+    }
+
+    @Transactional
+    public void purgeOldReversedProductionOrderAlerts() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(3);
+        int deleted = alertRepo.deleteByAlertTypeAndCreatedAtBefore(AlertType.PRODUCTION_REVERSED, cutoff);
+    }
 }

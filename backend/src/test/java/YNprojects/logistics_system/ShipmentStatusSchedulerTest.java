@@ -1,7 +1,7 @@
 package YNprojects.logistics_system;
 
 import YNprojects.logistics_system.entities.Shipment;
-import YNprojects.logistics_system.entities.ShipmentStatus;
+import YNprojects.logistics_system.shipment.entity.ShipmentStatus;
 import YNprojects.logistics_system.product.repository.ProductRepo;
 import YNprojects.logistics_system.repositories.ShipmentRepo;
 import YNprojects.logistics_system.scheduler.ShipmentStatusScheduler;

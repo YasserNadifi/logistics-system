@@ -88,9 +88,12 @@ public class ProductionOrderService {
         order.setProduct(pItem);
 
         // Enforce initial state as PLANNED regardless of incoming DTO status
+        if (dto.getStartDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("You can't create a past Production order");
+        }
+        order.setStartDate(dto.getStartDate());
         order.setStatus(ProductionOrderStatus.PLANNED);
         order.setCreationDate(LocalDate.now());
-        order.setStartDate(dto.getStartDate());
 
         order.setReference(generateReference());
 
@@ -201,7 +204,12 @@ public class ProductionOrderService {
         }
 
         order.setStatus(ProductionOrderStatus.IN_PROGRESS);
-        order.setStartDate(LocalDate.now());
+        if(order.getStartDate().isAfter(LocalDate.now())){
+            order.setStartDate(LocalDate.now());
+            long totalMinutes = (long) (order.getProduct().getQuantity() * order.getProduct().getProduct().getProductionDurationMinutes());
+            long daysToAdd = totalMinutes / (24 * 60);
+            order.setPlannedCompletionDate(order.getStartDate().plusDays(daysToAdd));
+        }
     }
 
     /**
@@ -210,6 +218,7 @@ public class ProductionOrderService {
     private void cancelPlanned(ProductionOrder order) {
         order.setStatus(ProductionOrderStatus.CANCELLED);
         order.setPlannedCompletionDate(null);
+        order.setStartDate(null);
     }
 
     /**

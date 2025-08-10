@@ -9,6 +9,7 @@ import YNprojects.logistics_system.mapper.ShipmentMapper;
 import YNprojects.logistics_system.product.entity.Product;
 import YNprojects.logistics_system.product.repository.ProductRepo;
 import YNprojects.logistics_system.repositories.*;
+import YNprojects.logistics_system.shipment.entity.ShipmentStatus;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

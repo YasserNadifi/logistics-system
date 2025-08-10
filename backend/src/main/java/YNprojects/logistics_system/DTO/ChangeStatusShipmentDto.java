@@ -1,6 +1,6 @@
 package YNprojects.logistics_system.DTO;
 
-import YNprojects.logistics_system.entities.ShipmentStatus;
+import YNprojects.logistics_system.shipment.entity.ShipmentStatus;
 import lombok.*;
 
 import java.time.LocalDate;

@@ -1,6 +1,9 @@
 package YNprojects.logistics_system.entities;
 
 import YNprojects.logistics_system.product.entity.Product;
+import YNprojects.logistics_system.shipment.entity.ShipmentDirection;
+import YNprojects.logistics_system.shipment.entity.ShipmentStatus;
+import YNprojects.logistics_system.shipment.entity.TransportMode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +27,9 @@ public class Shipment {
     private LocalDate departureDate;
     private LocalDate estimateArrivalDate;
     private LocalDate actualArrivalDate;
+    private String destination;
+    private String trackingNumber;
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
@@ -31,9 +37,6 @@ public class Shipment {
     private TransportMode transportMode;
     @Enumerated(EnumType.STRING)
     private ShipmentDirection direction;
-    private String destination;
-    private String trackingNumber;
-    private LocalDateTime createdAt;
 
     @ManyToOne
     private Product product;

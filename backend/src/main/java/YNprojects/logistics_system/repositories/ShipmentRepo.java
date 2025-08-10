@@ -1,7 +1,7 @@
 package YNprojects.logistics_system.repositories;
 
 import YNprojects.logistics_system.entities.Shipment;
-import YNprojects.logistics_system.entities.ShipmentStatus;
+import YNprojects.logistics_system.shipment.entity.ShipmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;

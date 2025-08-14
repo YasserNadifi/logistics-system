@@ -51,7 +51,11 @@ public class SupplierService {
                 .orElseThrow(() -> new ResourceNotFoundException("Supplier not found. Id: " + dto.getId()));
 
         if (dto.getSupplierName() != null) existing.setSupplierName(dto.getSupplierName());
-        if (dto.getContactInfo() != null) existing.setContactInfo(dto.getContactInfo());
+        if (dto.getPhone() != null) existing.setPhone(dto.getPhone());
+        if (dto.getCity() != null) existing.setCity(dto.getCity());
+        if (dto.getCountry() != null) existing.setCountry(dto.getCountry());
+        if (dto.getEmail() != null) existing.setEmail(dto.getEmail());
+        if (dto.getAddress() != null) existing.setAddress(dto.getAddress());
 
         Supplier saved = supplierRepo.save(existing);
         return SupplierMapper.toDto(saved);

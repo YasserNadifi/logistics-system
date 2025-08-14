@@ -29,4 +29,6 @@ public class Alert {
     @Enumerated(EnumType.STRING)
     private EntityType entityType;
     private Long entityId;
+
+    private String message;
 }

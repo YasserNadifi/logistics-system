@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { 
   Home,
   Package2,
@@ -20,6 +20,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { AuthContext } from '../../App';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ 
   currentPage, 
@@ -29,8 +30,10 @@ const Sidebar = ({
   onClose
 }) => {
   const [showUserMenu, setShowUserMenu] = React.useState(false);
+  const userMenuRef = useRef(null);
 
-  const {logout,user} = useContext(AuthContext);
+  const {logout, user} = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, restricted: false },
@@ -46,6 +49,23 @@ const Sidebar = ({
     { id: 'users', label: 'Users', icon: UserCheck, restricted: true },
   ];
 
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
+
   const handleNavigation = (pageId, isRestricted) => {
     if (!isRestricted) {
       onPageChange(pageId);
@@ -53,6 +73,14 @@ const Sidebar = ({
     }
   };
 
+  const handleUserMenuAction = (action) => {
+    setShowUserMenu(false);
+    if (action === 'profile') {
+      navigate("/user-profile");
+    } else if (action === 'logout') {
+      logout();
+    }
+  };
 
   return (
     <>
@@ -70,11 +98,10 @@ const Sidebar = ({
       } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}>
         
         {/* Header */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">LogiFlow</h2>
+        <div className="flex items-center justify-between h-20 px-6 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900 font-jetbrains">Logistics<br/>
+          System</h2>
           <div className="flex items-center space-x-2">
-
-            
             <button
               onClick={onClose}
               className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -112,32 +139,37 @@ const Sidebar = ({
           </div>
         </nav>
 
-        {/* User Menu - Enhanced version moved from top bar */}
-        <div className="border-t border-gray-200">
-          {/* User Menu Dropdown */}
+        {/* User Info Section */}
+        <div className="border-t border-gray-200 relative" ref={userMenuRef}>
+          {/* User Menu Overlay Dropdown */}
           {showUserMenu && (
-            <div className="p-3 border-b border-gray-200 bg-gray-50">
-              <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg flex items-center space-x-2 mb-1">
-                <User className="h-4 w-4" />
-                <span>Profile Settings</span>
-              </button>
-              
-              <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg flex items-center space-x-2 mb-1">
-                <Settings className="h-4 w-4" />
-                <span>Preferences</span>
-              </button>
+            <div className="absolute bottom-full left-0 right-0 bg-white border border-gray-200 rounded-t-lg shadow-lg z-60">
+              <div className="p-2">
+                <button 
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2 mb-1"
+                  onClick={() => handleUserMenuAction('profile')}
+                >
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </button>
+                
+                {/* <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center space-x-2 mb-1">
+                  <Settings className="h-4 w-4" />
+                  <span>Preferences</span>
+                </button> */}
 
-              <button 
-                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center space-x-2"
-                onClick={logout}
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </button>
+                <button 
+                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center space-x-2"
+                  onClick={() => handleUserMenuAction('logout')}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           )}
           
-          {/* User Info */}
+          {/* User Info Button */}
           <div className="p-4">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}

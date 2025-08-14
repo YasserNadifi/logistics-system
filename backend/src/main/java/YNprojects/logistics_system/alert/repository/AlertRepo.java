@@ -18,4 +18,6 @@ public interface AlertRepo extends JpaRepository<Alert, Long> {
     List<Alert> findByAlertType(AlertType alertType);
 
     int deleteByAlertTypeAndCreatedAtBefore(AlertType alertType, LocalDateTime createdAtBefore);
+
+    int deleteByAlertTypeAndEntityTypeAndCreatedAtBefore(AlertType alertType, EntityType entityType, LocalDateTime createdAtBefore);
 }

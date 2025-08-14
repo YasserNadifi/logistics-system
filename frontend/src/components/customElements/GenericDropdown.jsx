@@ -14,7 +14,7 @@ import React, { useState, useRef, useEffect } from 'react';
  *     - or plain items: { id, name, sku, unit, ... } (fallback)
  * - placeholder: label string
  */
-const GenericDropdown = ({ value, onChange, options = [], placeholder = 'Select...' }) => {
+const GenericDropdown = ({ value, onChange, options = [], placeholder = 'Select...' , compact = false }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlight, setHighlight] = useState(0);
@@ -117,22 +117,33 @@ const GenericDropdown = ({ value, onChange, options = [], placeholder = 'Select.
       setQuery('');
     }
   };
+    // compact paddings when true
+const buttonPadding = compact ? 'px-3' : 'px-4 py-3';
+const inputPadding  = compact ? 'px-2 py-1' : 'px-3 py-2';
+
+  const listItemPadding = compact ? 'px-3 py-2' : 'px-4 py-3';
+
+  const buttonHeight = compact ? 'h-10' : '';
+const inputHeight = compact ? 'h-9' : ''; // slightly smaller for the search input inside dropdown
+
 
   return (
     <div className="relative" ref={ref}>
       <label className="block text-sm font-medium text-gray-700 mb-2">{placeholder}</label>
 
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        onKeyDown={onKeyDown}
-        className="w-full text-left px-4 py-3 border border-gray-300 rounded-lg bg-white hover:shadow-sm flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
+<button
+  type="button"
+  onClick={() => setOpen(o => !o)}
+  onKeyDown={onKeyDown}
+  className={`w-full text-left ${buttonPadding} ${buttonHeight} border border-gray-300 rounded-lg bg-white hover:shadow-sm flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 transition`}
+  aria-haspopup="listbox"
+  aria-expanded={open}
+> 
         <div className="flex flex-col min-w-0">
           <span className="text-sm font-medium text-gray-900 truncate">{selected ? selected.title : placeholder}</span>
-          <span className="text-xs text-gray-500 truncate">{selected ? selected.subtitle : ''}</span>
+        {(!compact && (selected ? selected.subtitle : true)) && (
+      <span className="text-xs text-gray-500 truncate">{selected ? selected.subtitle : ''}</span>
+    )}
         </div>
 
         <div className="flex items-center space-x-3">
@@ -157,14 +168,14 @@ const GenericDropdown = ({ value, onChange, options = [], placeholder = 'Select.
       {open && (
         <div className="absolute z-50 mt-2 w-full rounded-lg bg-white shadow-lg border border-gray-100">
           <div className="px-3 py-2">
-            <input
-              autoFocus
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder="Search by name or SKU..."
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+<input
+  autoFocus
+  value={query}
+  onChange={(e) => setQuery(e.target.value)}
+  onKeyDown={onKeyDown}
+  placeholder="Search by name or SKU..."
+  className={`w-full ${inputPadding} ${inputHeight} text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+/>
           </div>
 
           <ul role="listbox" tabIndex={-1} className="max-h-64 overflow-auto divide-y divide-gray-100">
@@ -185,7 +196,7 @@ const GenericDropdown = ({ value, onChange, options = [], placeholder = 'Select.
                     setOpen(false);
                     setQuery('');
                   }}
-                  className={`cursor-pointer px-4 py-3 flex items-center justify-between ${isHighlighted ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                  className={`cursor-pointer ${listItemPadding} flex items-center justify-between ${isHighlighted ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
                 >
                   <div className="flex flex-col min-w-0">
                     <span className="text-sm font-medium text-gray-900 truncate">{item.title}</span>

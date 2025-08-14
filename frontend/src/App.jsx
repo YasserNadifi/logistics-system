@@ -7,13 +7,17 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import Dashboard from './components/pages/Dashboard';
 import ProductsPage from './components/pages/ProductsPage';
 import LoginPage from './components/pages/LoginPage';
-import { UsersPage } from './components/pages/UsersPage';
+import UsersPage from './components/pages/UsersPage';
 import RawMaterialsPage from './components/pages/RawMaterialsPage';
 import ProductInventory from './components/pages/ProductInventory';
 // import RawMaterialInventoryPage from './components/pages/RawMaterialInventory';
 import RawMaterialInventory from './components/pages/RawMaterialInventory';
 import InboundShipmentsPage from './components/pages/InboundShipmentsPage';
 import OutboundShipmentsPage from './components/pages/OutboundShipmentsPage';
+import ProductionOrdersPage from './components/pages/ProductionOrdersPage';
+import SuppliersPage from './components/pages/SuppliersPage';
+import AlertsPage from './components/pages/AlertsPage';
+import UserProfilePage from './components/pages/UserProfilePage';
 
 const AuthContext = React.createContext();
 
@@ -108,6 +112,10 @@ const LayoutWrapper = ({ user }) => {
         <Route path="/raw-material-inventory" element={<RawMaterialInventory userRole={user?.role} />} />
         <Route path="/inbound-shipments" element={<InboundShipmentsPage userRole={user?.role} />} />
         <Route path="/outbound-shipments" element={<OutboundShipmentsPage userRole={user?.role} />} />
+        <Route path="/production-orders" element={<ProductionOrdersPage userRole={user?.role} />} />
+        <Route path="/suppliers" element={<SuppliersPage userRole={user?.role} />} />
+        <Route path="/alerts" element={<AlertsPage userRole={user?.role} />} />
+        <Route path="/user-profile" element={<UserProfilePage/>} />
         
 
         {/* Add more protected routes here */}

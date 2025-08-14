@@ -92,25 +92,27 @@ public class ProductionOrderService {
         pItem.setProductionOrder(order);
         order.setProduct(pItem);
 
-        // Enforce initial state as PLANNED regardless of incoming DTO status
-        if (dto.getStartDate().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("You can't create a past Production order");
-        }
         order.setStartDate(dto.getStartDate());
-        order.setStatus(ProductionOrderStatus.PLANNED);
         order.setCreationDate(LocalDate.now());
-
         order.setReference(generateReference());
-
         if (order.getStartDate() != null && pItem.getProduct().getProductionDurationMinutes() != null) {
             long totalMinutes = (long) (pItem.getQuantity() * pItem.getProduct().getProductionDurationMinutes());
             long daysToAdd = totalMinutes / (24 * 60);
             order.setPlannedCompletionDate(order.getStartDate().plusDays(daysToAdd));
+            System.out.println(order.getPlannedCompletionDate());
         }
 
-        // Persist (items cascade)
+        order.setStatus(ProductionOrderStatus.PLANNED);
         ProductionOrder saved = productionOrderRepo.save(order);
-        return saved;
+        Long orderId = saved.getId();
+        if(!order.getStartDate().isAfter(LocalDate.now())) {
+            changeStatus(orderId, ProductionOrderStatus.IN_PROGRESS);
+            if( order.getPlannedCompletionDate()!=null && !order.getPlannedCompletionDate().isAfter(LocalDate.now())) {
+                changeStatus(orderId,ProductionOrderStatus.COMPLETED);
+            }
+        }
+        ProductionOrder created = productionOrderRepo.findById(orderId).orElseThrow();
+        return created;
     }
 
 
@@ -135,7 +137,7 @@ public class ProductionOrderService {
         if (current == ProductionOrderStatus.COMPLETED
                 || current == ProductionOrderStatus.CANCELLED
                 || current == ProductionOrderStatus.REVERSED) {
-            throw new IllegalStateException("Cannot change status of an order that is " + current);
+            return order;
         }
 
         // Validate allowed transitions
@@ -184,7 +186,6 @@ public class ProductionOrderService {
             throw new IllegalStateException("Production order has no raw materials defined.");
         }
 
-        // Reserve/deduct each raw material (with locking at repo level)
         for (ProductionOrderMaterial item : order.getRawMaterials()) {
             RawMaterial raw = item.getRawMaterial();
             if (raw == null || raw.getId() == null) {
@@ -199,11 +200,28 @@ public class ProductionOrderService {
                     .orElseThrow(() -> new IllegalStateException("No inventory for raw material: " + raw.getName()));
 
             if (inventory.getQuantity() < required) {
-                throw new IllegalStateException("Insufficient raw material '" + raw.getName()
-                        + "'. Required: " + required + ", available: " + inventory.getQuantity());
+                cancelPlanned(order);
+                alertService.createIfNotExistsWithMessage(
+                        AlertType.RAW_MATERIAL_SHORTAGE,
+                        AlertSeverity.CRITICAL,
+                        EntityType.PRODUCTION_ORDER,
+                        order.getId(),
+                        "There aren't enough raw materials for this order!"
+                );
+                return;
             }
+        }
 
-            // Deduct now to reserve material
+        // Reserve/deduct each raw material (with locking at repo level)
+        for (ProductionOrderMaterial item : order.getRawMaterials()) {
+            RawMaterial raw = item.getRawMaterial();
+            double required = item.getQuantity();
+
+            // IMPORTANT: repository method must lock the row (PESSIMISTIC_WRITE)
+            RawMaterialInventory inventory = rawMaterialInventoryRepo
+                    .findByRawMaterial(raw)
+                    .orElseThrow();
+
             inventory.setQuantity(inventory.getQuantity() - required);
             rawMaterialInventoryRepo.save(inventory);
             if (inventory.getQuantity() <= inventory.getReorderThreshold()) {
@@ -277,7 +295,9 @@ public class ProductionOrderService {
 
 
         order.setStatus(ProductionOrderStatus.COMPLETED);
-        order.setPlannedCompletionDate(LocalDate.now());
+        if(order.getStartDate().isAfter(LocalDate.now())){
+            order.setPlannedCompletionDate(LocalDate.now());
+        }
     }
 
     /**

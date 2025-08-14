@@ -2,6 +2,7 @@ package YNprojects.logistics_system.scheduler;
 
 
 import YNprojects.logistics_system.alert.entity.AlertType;
+import YNprojects.logistics_system.alert.entity.EntityType;
 import YNprojects.logistics_system.alert.repository.AlertRepo;
 import YNprojects.logistics_system.productionorder.entity.ProductionOrder;
 import YNprojects.logistics_system.productionorder.entity.ProductionOrderStatus;
@@ -45,6 +46,8 @@ public class SystemScheduler {
 
         purgeOldCancelledProductionOrderAlerts();
         purgeOldReversedProductionOrderAlerts();
+
+        purgeOldRawMaterialShortageAlertsForProductionOrders();
     }
 
 
@@ -107,5 +110,11 @@ public class SystemScheduler {
     public void purgeOldReversedProductionOrderAlerts() {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(3);
         int deleted = alertRepo.deleteByAlertTypeAndCreatedAtBefore(AlertType.PRODUCTION_REVERSED, cutoff);
+    }
+
+    @Transactional
+    public void purgeOldRawMaterialShortageAlertsForProductionOrders() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(3);
+        int deleted = alertRepo.deleteByAlertTypeAndEntityTypeAndCreatedAtBefore(AlertType.PRODUCTION_REVERSED, EntityType.PRODUCTION_ORDER, cutoff);
     }
 }

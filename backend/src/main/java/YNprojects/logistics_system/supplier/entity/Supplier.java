@@ -21,7 +21,12 @@ public class Supplier {
     private Long id;
 
     private String supplierName;
-    private String contactInfo;
+
+    private String email;
+    private String phone;
+    private String address;
+    private String city;
+    private String country;
 
     @OneToMany
     private List<Shipment> shipments;

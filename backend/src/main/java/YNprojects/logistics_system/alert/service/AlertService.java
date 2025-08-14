@@ -32,6 +32,21 @@ public class AlertService {
                     return alertRepo.save(alert);
                 });
     }
+    @Transactional
+    public Alert createIfNotExistsWithMessage(AlertType type, AlertSeverity severity,
+                                              EntityType entityType, Long entityId, String message) {
+        return alertRepo.findFirstByAlertTypeAndEntityTypeAndEntityId(type, entityType, entityId)
+                .orElseGet(() -> {
+                    Alert alert = new Alert();
+                    alert.setAlertType(type);
+                    alert.setSeverity(severity);
+                    alert.setEntityType(entityType);
+                    alert.setEntityId(entityId);
+                    alert.setMessage(message);
+                    alert.setCreatedAt(LocalDateTime.now());
+                    return alertRepo.save(alert);
+                });
+    }
 
     @Transactional(readOnly = true)
     public List<Alert> getAll() {

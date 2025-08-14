@@ -59,8 +59,16 @@ public class ShipmentService {
         return "SHIP-" + today.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + sequence;
     }
 
-    public List<ShipmentDto> getAllShipment() {
+    public List<ShipmentDto> getAllShipments() {
         return shipmentRepo.findAll().stream().map(ShipmentMapper::toDto).collect(Collectors.toList());
+    }
+
+    public List<ShipmentDto> getInboundShipments() {
+        return shipmentRepo.findByDirection(ShipmentDirection.INBOUND).stream().map(ShipmentMapper::toDto).collect(Collectors.toList());
+    }
+
+    public List<ShipmentDto> getOutboundShipments() {
+        return shipmentRepo.findByDirection(ShipmentDirection.OUTBOUND).stream().map(ShipmentMapper::toDto).collect(Collectors.toList());
     }
 
     public ShipmentDto getShipmentById(Long id) {
@@ -188,6 +196,8 @@ public class ShipmentService {
 
         Long shipmentId = changeShipmentStatusDto.getShipmentId() ;
         ShipmentStatus targetStatus = changeShipmentStatusDto.getTargetStatus();
+        System.out.println("shipmentId = "+shipmentId);
+        System.out.println("targetStatus = "+targetStatus);
         if (shipmentId == null || targetStatus == null) {
             throw new IllegalArgumentException("shipmentId and targetStatus are required");
         }
@@ -215,7 +225,8 @@ public class ShipmentService {
         // PLANNED -> IN_TRANSIT
         if (current == ShipmentStatus.PLANNED && targetStatus == ShipmentStatus.IN_TRANSIT) {
             // set departure date if missing
-            if (shipment.getDepartureDate() == null) {
+            if (shipment.getDepartureDate() == null || shipment.getDepartureDate().isAfter(today)) {
+                System.out.println("it is isn't it, departure date is before today");
                 shipment.setDepartureDate(today);
             }
             shipment.setStatus(ShipmentStatus.IN_TRANSIT);

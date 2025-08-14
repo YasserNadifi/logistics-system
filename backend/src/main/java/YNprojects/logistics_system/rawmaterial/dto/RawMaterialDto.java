@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -13,4 +15,7 @@ public class RawMaterialDto {
     private String name;
     private String description;
     private String unit;
+    private String sku;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

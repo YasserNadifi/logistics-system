@@ -10,6 +10,7 @@ import YNprojects.logistics_system.rawmaterialinventory.service.RawMaterialInven
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,6 +37,9 @@ public class RawMaterialService {
         rawMaterial.setName(createRawMaterialDto.getName());
         rawMaterial.setDescription(createRawMaterialDto.getDescription());
         rawMaterial.setUnit(createRawMaterialDto.getUnit());
+        rawMaterial.setSku(createRawMaterialDto.getSku());
+        rawMaterial.setCreatedAt(LocalDateTime.now());
+        rawMaterial.setUpdatedAt(LocalDateTime.now());
 
         rawMaterial = rawMaterialRepo.save(rawMaterial);
         rawMaterialInventoryService.createRawMaterialInventory(rawMaterial);
@@ -50,6 +54,8 @@ public class RawMaterialService {
         rawMaterial.setName(rawMaterialDto.getName());
         rawMaterial.setDescription(rawMaterialDto.getDescription());
         rawMaterial.setUnit(rawMaterialDto.getUnit());
+        rawMaterial.setSku(rawMaterialDto.getSku());
+        rawMaterial.setUpdatedAt(LocalDateTime.now());
 
         RawMaterial updated = rawMaterialRepo.save(rawMaterial);
         return RawMaterialMapper.toRawMaterialDto(updated);

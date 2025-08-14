@@ -1,7 +1,7 @@
 package YNprojects.logistics_system.product.entity;
 
 import YNprojects.logistics_system.productinventory.entities.ProductInventory;
-import YNprojects.logistics_system.entities.Shipment;
+import YNprojects.logistics_system.shipment.entity.Shipment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,47 +1,131 @@
-import { createContext, use, useState } from 'react'
-import {BrowserRouter,Routes,Route}  from 'react-router-dom'
-// import './App.css'
-import { Login } from './components/Login'
-import { RegisterPage } from './components/RegisterPage';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { DashboardPage } from './components/DashboardPage';
-import { ProductsPage } from './components/ProductsPage';
-import { InventoryPage } from './components/InventoryPage';
-import { ShipmentsPage } from './components/ShipmentsPage';
-import { UsersPage } from './components/UsersPage';
-import { AlertsPage } from './components/AlertsPage';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
-export const AppContext = createContext();
+// Import your page components
+import Dashboard from './components/pages/Dashboard';
+import ProductsPage from './components/pages/ProductsPage';
+import LoginPage from './components/pages/LoginPage';
+import { UsersPage } from './components/pages/UsersPage';
+import RawMaterialsPage from './components/pages/RawMaterialsPage';
+import ProductInventory from './components/pages/ProductInventory';
+// import RawMaterialInventoryPage from './components/pages/RawMaterialInventory';
+import RawMaterialInventory from './components/pages/RawMaterialInventory';
+import InboundShipmentsPage from './components/pages/InboundShipmentsPage';
+import OutboundShipmentsPage from './components/pages/OutboundShipmentsPage';
 
-function App() {
-  
-  const [jwt,setJwt]=useState("");
-  const [user,setUser]=useState(null);
+const AuthContext = React.createContext();
+
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('user');
+      }
+    }
+    setIsLoading(false);
+  }, []);
+
+  // Login function
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
+
+  const setJwt = (jwt)=>{
+    localStorage.setItem("jwt",jwt);
+  }
+
+  // Logout function
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('jwt');
+  };
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <AppContext.Provider value={{jwt, setJwt,user,setUser}} >
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path='/register' element={<RegisterPage/>} />
+    <AuthContext.Provider value={{ user, setJwt, login, logout }}>
+      <Router>
+        <AppContent user={user} />
+      </Router>
+    </AuthContext.Provider>
+  );
+};
 
-            <Route element={<ProtectedRoute/>}>
-              <Route path="/dashboard" element={<DashboardPage/>}/>
-              <Route path="/products" element={<ProductsPage/>}/>
-              <Route path="/inventory" element={<InventoryPage/>}/>
-              <Route path="/shipments" element={<ShipmentsPage/>}/>
-              <Route path="/alerts" element={<AlertsPage/>}/>
-            </Route>
-                          
-            <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-              <Route path="/users" element={<UsersPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </AppContext.Provider>
-    </>
-  )
-}
+// This component handles the routing logic
+const AppContent = ({ user }) => {
+  const location = useLocation();
 
-export default App
+  return (
+    <Routes>
+      {/* Public route - Login page without layout */}
+      <Route 
+        path="/login" 
+        element={
+          user ? <Navigate to="/" replace /> : <LoginPage />
+        } 
+      />
+      
+      {/* Protected routes with layout */}
+      <Route path="/*" element={
+        <ProtectedRoute user={user}>
+          <LayoutWrapper user={user} />
+        </ProtectedRoute>
+      } />
+    </Routes>
+  );
+};
+
+// Layout wrapper component for protected routes
+const LayoutWrapper = ({ user }) => {
+  return (
+    <Layout user={user}>
+      <Routes>
+        <Route path="/" element={<Dashboard userRole={user?.role} />} />
+        
+        <Route path="/products" element={<ProductsPage userRole={user?.role} />} />
+
+        <Route path="/raw-materials" element={<RawMaterialsPage userRole={user?.role} />} />
+        <Route path="/product-inventory" element={<ProductInventory userRole={user?.role} />} />
+        <Route path="/raw-material-inventory" element={<RawMaterialInventory userRole={user?.role} />} />
+        <Route path="/inbound-shipments" element={<InboundShipmentsPage userRole={user?.role} />} />
+        <Route path="/outbound-shipments" element={<OutboundShipmentsPage userRole={user?.role} />} />
+        
+
+        {/* Add more protected routes here */}
+        <Route 
+          path="/users" 
+          element={
+            <ProtectedRoute user={user} requiredRole="ADMIN">
+              <UsersPage/>
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Catch all route - redirect to dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Layout>
+  );
+};
+
+export default App;
+export { AuthContext };

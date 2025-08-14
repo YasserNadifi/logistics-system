@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 @RequestMapping("/shipments")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
 public class ShipmentController {
     private final ShipmentService shipmentService;
 
@@ -23,7 +25,19 @@ public class ShipmentController {
 
     @GetMapping
     public ResponseEntity<List<ShipmentDto>> listShipments() {
-        List<ShipmentDto> list = shipmentService.getAllShipment();
+        List<ShipmentDto> list = shipmentService.getAllShipments();
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/inbound")
+    public ResponseEntity<List<ShipmentDto>> getInboundShipments() {
+        List<ShipmentDto> list = shipmentService.getInboundShipments();
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/outbound")
+    public ResponseEntity<List<ShipmentDto>> getOutboundShipments() {
+        List<ShipmentDto> list = shipmentService.getOutboundShipments();
         return ResponseEntity.ok(list);
     }
 
@@ -34,7 +48,8 @@ public class ShipmentController {
     }
 
     @PutMapping("/change-status")
-    public ResponseEntity<ShipmentDto> changeStatus(ChangeShipmentStatusDto changeDto) {
+    public ResponseEntity<ShipmentDto> changeStatus(@RequestBody ChangeShipmentStatusDto changeDto) {
+        System.out.println(changeDto);
         ShipmentDto updated = shipmentService.changeShipmentStatus(changeDto);
         return ResponseEntity.ok(updated);
     }

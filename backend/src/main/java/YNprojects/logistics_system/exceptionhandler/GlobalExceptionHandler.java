@@ -1,14 +1,11 @@
 package YNprojects.logistics_system.exceptionhandler;
 
-import YNprojects.logistics_system.entities.ErrorResponse;
 import YNprojects.logistics_system.exceptions.ResourceNotFoundException;
 import YNprojects.logistics_system.exceptions.UsernameAlreadyTakenException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;

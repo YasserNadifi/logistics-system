@@ -1,8 +1,8 @@
 package YNprojects.logistics_system.filter;
 
-import YNprojects.logistics_system.entities.User;
-import YNprojects.logistics_system.services.JwtService;
-import YNprojects.logistics_system.services.UserDetailsServiceImp;
+import YNprojects.logistics_system.user.entity.User;
+import YNprojects.logistics_system.user.service.JwtService;
+import YNprojects.logistics_system.user.service.UserDetailsServiceImp;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,10 +12,8 @@ import lombok.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;

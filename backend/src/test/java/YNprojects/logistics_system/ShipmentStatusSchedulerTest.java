@@ -1,11 +1,11 @@
 package YNprojects.logistics_system;
 
-import YNprojects.logistics_system.entities.Shipment;
+import YNprojects.logistics_system.scheduler.SystemScheduler;
 import YNprojects.logistics_system.shipment.entity.ShipmentStatus;
 import YNprojects.logistics_system.product.repository.ProductRepo;
-import YNprojects.logistics_system.repositories.ShipmentRepo;
 import YNprojects.logistics_system.scheduler.ShipmentStatusScheduler;
-import YNprojects.logistics_system.services.ShipmentService;
+import YNprojects.logistics_system.shipment.repo.ShipmentRepo;
+import YNprojects.logistics_system.shipment.service.ShipmentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +27,7 @@ class ShipmentStatusSchedulerTest {
     @Autowired
     ShipmentService shipmentService;
     @Autowired
-    ShipmentStatusScheduler scheduler;
+    SystemScheduler scheduler;
 
     @Autowired
     ProductRepo productRepo;

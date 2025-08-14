@@ -7,12 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class RawMaterial {
+public class  RawMaterial {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +22,11 @@ public class RawMaterial {
     private String name;
     private String description;
     private String unit;
+    private String sku;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "product")
+    @OneToOne(mappedBy = "rawMaterial")
     private RawMaterialInventory rawMaterialInventory;
 
 }

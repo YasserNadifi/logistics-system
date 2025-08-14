@@ -14,6 +14,9 @@ public class RawMaterialMapper {
         dto.setName(rawMaterial.getName());
         dto.setDescription(rawMaterial.getDescription());
         dto.setUnit(rawMaterial.getUnit());
+        dto.setSku(rawMaterial.getSku());
+        dto.setUpdatedAt(rawMaterial.getUpdatedAt());
+        dto.setCreatedAt(rawMaterial.getCreatedAt());
         return dto;
     }
 
@@ -26,6 +29,9 @@ public class RawMaterialMapper {
         rawMaterial.setName(dto.getName());
         rawMaterial.setDescription(dto.getDescription());
         rawMaterial.setUnit(dto.getUnit());
+        rawMaterial.setSku(dto.getSku());
+        rawMaterial.setCreatedAt(dto.getCreatedAt());
+        rawMaterial.setUpdatedAt(dto.getUpdatedAt());
         return rawMaterial;
     }
 }

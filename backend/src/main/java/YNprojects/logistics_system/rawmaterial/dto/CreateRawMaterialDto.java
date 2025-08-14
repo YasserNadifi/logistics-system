@@ -13,4 +13,5 @@ public class CreateRawMaterialDto {
     private String name;
     private String description;
     private String unit;
+    private String sku;
 }

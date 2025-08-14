@@ -2,7 +2,7 @@ package YNprojects.logistics_system.config;
 
 
 import YNprojects.logistics_system.filter.JwtAuthenticationFilter;
-import YNprojects.logistics_system.services.UserDetailsServiceImp;
+import YNprojects.logistics_system.user.service.UserDetailsServiceImp;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +21,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 

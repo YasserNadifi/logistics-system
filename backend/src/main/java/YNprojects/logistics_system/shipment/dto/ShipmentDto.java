@@ -28,13 +28,10 @@ public class ShipmentDto {
     private Double quantity;
 
     private ProductDto productDto;
-    private String productName;
 
     private RawMaterialDto rawMaterialDto;
-    private String rawMaterialName;
 
     private SupplierDto supplierDto;
-    private String supplierName;
 
     private String customerName;
 

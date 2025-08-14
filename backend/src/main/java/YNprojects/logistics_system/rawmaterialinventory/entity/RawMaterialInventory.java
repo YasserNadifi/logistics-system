@@ -1,6 +1,6 @@
 package YNprojects.logistics_system.rawmaterialinventory.entity;
 
-import YNprojects.logistics_system.entities.Inventory;
+import YNprojects.logistics_system.productinventory.entities.Inventory;
 import YNprojects.logistics_system.rawmaterial.entity.RawMaterial;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

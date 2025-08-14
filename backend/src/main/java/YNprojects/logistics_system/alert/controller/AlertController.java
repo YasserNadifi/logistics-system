@@ -1,6 +1,5 @@
 package YNprojects.logistics_system.alert.controller;
 
-import YNprojects.logistics_system.DTO.AlertDto;
 import YNprojects.logistics_system.alert.entity.Alert;
 import YNprojects.logistics_system.alert.service.AlertService;
 import lombok.AllArgsConstructor;

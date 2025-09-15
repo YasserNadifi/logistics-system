@@ -81,7 +81,7 @@ The platform centralizes operations related to raw materials, finished products,
 ![Outbound Shipments](./screenshots/outship.png)
 
 - **Inbound Shipments**
-![Inbound Shipments](./screenshots/in20%ship.png)
+![Inbound Shipments](./screenshots/in%20ship.png)
 
 ### 🏭 Production Orders
 ![Production Orders](./screenshots/po.png)

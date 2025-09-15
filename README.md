@@ -56,7 +56,6 @@ The platform centralizes operations related to raw materials, finished products,
 
 - `frontend/` → React application with Tailwind UI components  
 - `backend/` → Spring Boot application (REST API + JPA + Security)  
-- `database/` → MySQL schema & migrations  
 
 ---
 
